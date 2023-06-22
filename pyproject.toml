@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "mothership"
+version = "0.0.0"
+description = ""
+authors = ["Alexey Gerasev <alexey.gerasev@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+toml = "^0.10.2"
+pydantic = "^1.10.9"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.4.0"
+black = "^23.3.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+strict = true
+namespace_packages = true
