@@ -78,18 +78,6 @@ files = [
 ]
 
 [[package]]
-name = "dataclass-type-validator"
-version = "0.1.2"
-description = "Dataclass Type Validator Library"
-category = "main"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "dataclass-type-validator-0.1.2.tar.gz", hash = "sha256:575f5ea89b5965ab5b3079cd67115b37a75a529fe221c35159e036e99faa0eb4"},
-    {file = "dataclass_type_validator-0.1.2-py3-none-any.whl", hash = "sha256:85b759f17ee106245f8748b9f5381bd9ad225dbeef573feee3ce46cdbfaaa8a7"},
-]
-
-[[package]]
 name = "mypy"
 version = "1.4.0"
 description = "Optional static typing for Python"
@@ -266,6 +254,18 @@ files = [
 ]
 
 [[package]]
+name = "types-toml"
+version = "0.10.8.6"
+description = "Typing stubs for toml"
+category = "dev"
+optional = false
+python-versions = "*"
+files = [
+    {file = "types-toml-0.10.8.6.tar.gz", hash = "sha256:6d3ac79e36c9ee593c5d4fb33a50cca0e3adceb6ef5cff8b8e5aef67b4c4aaf2"},
+    {file = "types_toml-0.10.8.6-py3-none-any.whl", hash = "sha256:de7b2bb1831d6f7a4b554671ffe5875e729753496961b3e9b202745e4955dafa"},
+]
+
+[[package]]
 name = "typing-extensions"
 version = "4.6.3"
 description = "Backported and Experimental Type Hints for Python 3.7+"
@@ -280,4 +280,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "7b1302e4f49d18538d6d7ed59acbb0797c0f81b8fd299a236acde2bd1f9fd3fe"
+content-hash = "05897b075d246f87f08b078399e7827d44c758c5445de3f66787dc48c1b96f8b"
