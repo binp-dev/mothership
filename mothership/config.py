@@ -1,28 +1,22 @@
 from __future__ import annotations
-from typing import List
+from typing import Dict
 
-from pathlib import Path
 from pydantic.dataclasses import dataclass
-
-FS_PATH = Path("/srv/nfs")
-COMMON_PATH = FS_PATH / "common"
-HOSTS_PATH = FS_PATH / "hosts"
 
 
 @dataclass
-class Device:
-    mac: str
-    ip: str | None = None
+class Base:
+    parent: str | None = None
+    path: str | None = None
 
-    @property
-    def path(self) -> Path:
-        return HOSTS_PATH / self.mac
 
-    @property
-    def rootfs_path(self) -> Path:
-        return self.path / "merged"
+@dataclass
+class Host:
+    base: str
+    addr: str | None = None
 
 
 @dataclass
 class Config:
-    devices: List[Device]
+    bases: Dict[str, Base]
+    hosts: Dict[str, Host]

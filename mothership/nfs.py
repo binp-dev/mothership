@@ -1,9 +1,10 @@
 from __future__ import annotations
+from typing import List
 
 from pathlib import Path
 from subprocess import run
 
-from .config import Config
+from .tree import Device
 
 EXPORTS_PATH = Path("/etc/exports.d/mothership.exports")
 
@@ -12,14 +13,12 @@ class Nfs:
     def refresh(self) -> None:
         run(["exportfs", "-ra"], check=True)
 
-    def export(self, config: Config) -> None:
+    def export(self, devices: List[Device]) -> None:
         print("Nfs: export all")
         EXPORTS_PATH.parent.mkdir(exist_ok=True)
         with open(EXPORTS_PATH, "w") as f:
-            for dev in config.devices:
-                f.write(
-                    f"{dev.rootfs_path} *(rw,sync,no_subtree_check,no_root_squash)\n"
-                )
+            for dev in devices:
+                f.write(f"{dev.path} *(rw,sync,no_subtree_check,no_root_squash)\n")
         self.refresh()
 
     def unexport(self) -> None:

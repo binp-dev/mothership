@@ -4,7 +4,7 @@ from typing import List
 from pathlib import Path
 from subprocess import run, PIPE
 
-from .config import Config, Device, FS_PATH, HOSTS_PATH, COMMON_PATH
+from .tree import Device, HOSTS_PATH
 
 
 class Overlayfs:
@@ -22,12 +22,10 @@ class Overlayfs:
     def _mount_single(self, device: Device) -> None:
         print(f"Overlayfs: Mounting device {device.mac}")
 
-        common = COMMON_PATH
-        assert common.exists(), f"Common FS not found at {common}"
-
-        path = device.path
+        lower = ":".join([str(p) for p in device.base.branch()])
+        merged = device.path
+        path = merged.parent
         path.mkdir(exist_ok=True)
-        merged = device.rootfs_path
         diff, work = path / "diff", path / "work"
         for p in [merged, diff, work]:
             p.mkdir(exist_ok=True)
@@ -35,7 +33,7 @@ class Overlayfs:
         run(
             [
                 *["mount", "-t", "overlay", "overlay"],
-                *["-o", f"lowerdir={common},upperdir={diff},workdir={work}"],
+                *["-o", f"lowerdir={lower},upperdir={diff},workdir={work}"],
                 *["-o", "nfs_export=on"],
                 *["-o", "index=on"],
                 merged,
@@ -43,18 +41,18 @@ class Overlayfs:
             check=True,
         )
 
-    def mount(self, config: Config) -> None:
+    def mount(self, devices: List[Device]) -> None:
         print(f"Overlayfs: Mounting all")
 
         old = Overlayfs._mounted()
-        paths = [d.rootfs_path for d in config.devices]
+        paths = [d.path for d in devices]
 
         for path in set(old).difference(paths):
             run(["umount", path], check=True)
 
         HOSTS_PATH.mkdir(exist_ok=True, parents=True)
-        for dev in config.devices:
-            if dev.rootfs_path not in old:
+        for dev in devices:
+            if dev.path not in old:
                 self._mount_single(dev)
 
         new = Overlayfs._mounted()

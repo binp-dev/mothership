@@ -1,2 +1,6 @@
-[[devices]]
-mac = "f8:dc:7a:46:04:58"
+[bases]
+common = {}
+skifio = { parent = "common" }
+
+[hosts]
+"f8:dc:7a:46:04:58" = { base = "skifio" }

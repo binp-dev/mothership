@@ -4,9 +4,10 @@ from pathlib import Path
 from argparse import ArgumentParser
 import toml
 
-from .config import Config, FS_PATH
+from .config import Config
 from .nfs import Nfs
 from .overlayfs import Overlayfs
+from .tree import build_tree, FS_PATH
 
 
 parser = ArgumentParser(prog="Mothership", description="PS controller orchestration")
@@ -34,10 +35,11 @@ if args.command == "up":
     with open(Path(args.config), "r") as f:
         config = Config(**toml.load(f))
     print(config)
+    devices = build_tree(config)
 
     nfs.unexport()
-    overlayfs.mount(config)
-    nfs.export(config)
+    overlayfs.mount(devices)
+    nfs.export(devices)
 
 elif args.command == "down":
     nfs.unexport()
