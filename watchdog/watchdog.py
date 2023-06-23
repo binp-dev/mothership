@@ -3,25 +3,22 @@
 import time
 
 
-def ping_watchdog() -> None:
-    with open("/dev/watchdog0", "w") as watchdog:
-        watchdog.write("1\n")
-
-
-def check_fs() -> None:
-    with open("/var/watchdog.lock", "w") as lock:
-        lock.write("1\n")
-
+lock = open("/var/watchdog.lock", "w")
 
 failures = 0
 while True:
-    ping_watchdog()
+    with open("/dev/watchdog0", "w") as watchdog:
+        watchdog.write("1\n")
 
     time.sleep(30)
 
     try:
-        check_fs()
+        lock.seek(0)
+        lock.write("1\n")
+        lock.flush()
     except RuntimeError:
         failures += 1
         if failures >= 2:
             raise
+    else:
+        failures = 0

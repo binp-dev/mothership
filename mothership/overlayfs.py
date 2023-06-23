@@ -3,6 +3,7 @@ from typing import List
 
 from pathlib import Path
 from subprocess import run, PIPE
+import shutil
 
 from .tree import Device, HOSTS_PATH
 
@@ -63,3 +64,7 @@ class Overlayfs:
 
         for path in Overlayfs._mounted():
             run(["umount", path], check=True)
+
+    def clear(self) -> None:
+        print(f"Overlayfs: Removing all hosts data")
+        shutil.rmtree(HOSTS_PATH)

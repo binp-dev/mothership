@@ -10,11 +10,14 @@ from .overlayfs import Overlayfs
 from .tree import build_tree, FS_PATH
 
 
-parser = ArgumentParser(prog="Mothership", description="PS controller orchestration")
+parser = ArgumentParser(
+    prog="Mothership",
+    description="Netboot management for multiple devices",
+)
 parser.add_argument(
     "command",
     type=str,
-    choices=["up", "down"],
+    choices=["up", "down", "clear"],
     help="Command to run.",
 )
 parser.add_argument(
@@ -44,3 +47,9 @@ if args.command == "up":
 elif args.command == "down":
     nfs.unexport()
     overlayfs.unmount()
+
+elif args.command == "clear":
+    overlayfs.clear()
+
+else:
+    raise KeyError(f"Unknown command: {args.command}")
