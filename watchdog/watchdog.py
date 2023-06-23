@@ -14,13 +14,14 @@ def check_fs() -> None:
 
 
 failures = 0
-ping_watchdog()
-while failures < 2:
-    time.sleep(20)
+while True:
+    ping_watchdog()
+
+    time.sleep(30)
 
     try:
         check_fs()
     except RuntimeError:
         failures += 1
-    else:
-        ping_watchdog()
+        if failures >= 2:
+            raise
