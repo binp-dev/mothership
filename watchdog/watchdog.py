@@ -9,7 +9,7 @@ failures = 0
 while True:
     with open("/dev/watchdog0", "w") as watchdog:
         watchdog.write("1\n")
-
+        # ioctl(watchdog, WDIOC_KEEPALIVE)
     time.sleep(30)
 
     try:

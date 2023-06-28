@@ -4,3 +4,5 @@ skifio = { parent = "common" }
 
 [hosts]
 "f8:dc:7a:46:04:58" = { base = "skifio" }
+"f8:dc:7a:a4:1c:e8" = { base = "skifio" }
+"f8:dc:7a:a4:1c:f2" = { base = "skifio" }
