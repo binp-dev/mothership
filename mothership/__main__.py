@@ -17,7 +17,7 @@ parser = ArgumentParser(
 parser.add_argument(
     "command",
     type=str,
-    choices=["up", "down", "clear"],
+    choices=["mount", "unmount", "clear"],
     help="Command to run.",
 )
 parser.add_argument(
@@ -33,7 +33,7 @@ assert FS_PATH.exists(), f"Base FS directory not found at {FS_PATH}"
 nfs = Nfs()
 overlayfs = Overlayfs()
 
-if args.command == "up":
+if args.command == "mount":
     assert args.config is not None
     with open(Path(args.config), "r") as f:
         config = Config(**toml.load(f))
@@ -44,7 +44,7 @@ if args.command == "up":
     overlayfs.mount(devices)
     nfs.export(devices)
 
-elif args.command == "down":
+elif args.command == "unmount":
     nfs.unexport()
     overlayfs.unmount()
 
