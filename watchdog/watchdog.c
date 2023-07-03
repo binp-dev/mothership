@@ -9,10 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <signal.h>
-#include <getopt.h>
 #include <sys/ioctl.h>
-#include <linux/types.h>
 #include <linux/watchdog.h>
 
 static const unsigned int PING_RATE = 30;
@@ -41,6 +38,8 @@ int main(int argc, char *argv[])
         printf("Failed to open lock file: %s\n", LOCK_FILE, strerror(errno));
         return 3;
     }
+
+    printf("Watchdog started\n");
 
     int failures = 0;
     for (;;)
