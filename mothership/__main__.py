@@ -5,8 +5,8 @@ from argparse import ArgumentParser
 import toml
 
 from .config import Config
-from .nfs import Nfs
-from .overlayfs import Overlayfs
+from .mount.nfs import Nfs
+from .mount.overlayfs import Overlayfs
 from .tree import build_tree, FS_PATH
 
 

@@ -10,6 +10,7 @@ readme = "README.md"
 python = "^3.9"
 toml = "^0.10.2"
 pydantic = "^1.10.9"
+flask = "^2.3.2"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.4.0"
@@ -23,3 +24,4 @@ build-backend = "poetry.core.masonry.api"
 [tool.mypy]
 strict = true
 namespace_packages = true
+ignore_missing_imports = true
