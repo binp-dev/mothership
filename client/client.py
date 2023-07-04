@@ -3,29 +3,35 @@ from typing import Any
 
 import socket
 import asyncio
+from asyncio import DatagramProtocol, BaseTransport, DatagramTransport
 
 
-class BeaconProtocol(asyncio.DatagramProtocol):
-    def connection_made(self, transport: asyncio.BaseTransport) -> None:
-        print(f"Connection made: {transport}")
+def uptime() -> float:
+    with open("/proc/uptime", "r") as f:
+        return float(f.readline().split()[0])
+
+
+class BeaconProtocol(DatagramProtocol):
+    def connection_made(self, sock: BaseTransport) -> None:
+        print(f"Connected: {sock}")
+        self.sock: DatagramTransport = sock  # type: ignore
 
     def datagram_received(self, data: bytes, addr: tuple[str | Any, int]) -> None:
-        print(f"Datagram received: {data!r} from {addr}")
+        print(f"Received: {data!r} from {addr}")
+        if data.startswith(b"\xbc"):
+            self.sock.sendto(b"\xcb" + int(uptime()).to_bytes(4, "big"), addr)
+        else:
+            print("Unsupported")
 
 
-async def main() -> None:
-    loop = asyncio.get_running_loop()
-    sock = (
-        await loop.create_datagram_endpoint(
-            BeaconProtocol,
-            local_addr=("0.0.0.0", 9696),
-            family=socket.AF_INET,
-            allow_broadcast=True,
-            reuse_port=True,
-        )
-    )[0]
-    while True:
-        await asyncio.sleep(1)
-
-
-asyncio.run(main())
+loop = asyncio.new_event_loop()
+loop.create_task(
+    loop.create_datagram_endpoint(
+        BeaconProtocol,
+        local_addr=("0.0.0.0", 9696),
+        family=socket.AF_INET,
+        allow_broadcast=True,
+        reuse_port=True,
+    )
+)
+loop.run_forever()
