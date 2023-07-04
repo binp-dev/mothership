@@ -9,19 +9,11 @@ import toml
 from flask import Flask
 
 from mothership.config import Config
+from mothership.tree import build_tree
+from .daemon import Daemon
 
 
-@dataclass
-class Context:
-    config: Config
-
-
-CONTEXT: Context
-
-
-def ctx() -> Context:
-    global CONTEXT
-    return CONTEXT
+DAEMON: Daemon
 
 
 app = Flask(__name__)
@@ -29,15 +21,17 @@ app = Flask(__name__)
 
 async def start(serve: Awaitable[None]) -> None:
     with open(Path("config.toml"), "r") as f:
-        config = Config(**toml.load(f))
-    print(config)
+        devices = build_tree(Config(**toml.load(f)))
+    print(devices)
 
-    global CONTEXT
-    CONTEXT = Context(config)
+    global DAEMON
+    DAEMON = Daemon(devices)
+    asyncio.create_task(DAEMON.run())
 
     await serve
 
 
 @app.route("/")
 async def root() -> str:
-    return str(ctx().config)
+    global DAEMON
+    return str(DAEMON.servants)

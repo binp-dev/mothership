@@ -18,6 +18,9 @@ class Mac:
         assert len(parts) == 6
         self.bytes = bytes([int(p, base=16) for p in parts])
 
+    def __hash__(self) -> int:
+        return hash(self.bytes)
+
     def __str__(self) -> str:
         return ":".join([f"{b:02x}" for b in self.bytes])
 
