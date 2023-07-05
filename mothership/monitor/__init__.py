@@ -1,11 +1,11 @@
 from __future__ import annotations
 from typing import Any, Awaitable
 
-import asyncio
 from pathlib import Path
-from dataclasses import dataclass
-
+import json
 import toml
+
+import asyncio
 from flask import Flask
 
 from mothership.config import Config
@@ -34,4 +34,4 @@ async def start(serve: Awaitable[None]) -> None:
 @app.route("/")
 async def root() -> str:
     global DAEMON
-    return str(DAEMON.servants)
+    return json.dumps(DAEMON.flat_hosts())

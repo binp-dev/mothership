@@ -1,46 +1,73 @@
 from __future__ import annotations
-from typing import Sequence
+from typing import Any, Optional, Sequence, Dict
 
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 
-import socket
 import asyncio
 
-from mothership.tree import Device
+from mothership.tree import Device, Mac
+from mothership.discover import find_devices
 
 
 @dataclass
-class Beacon:
-    expires: int
-    period: int
+class Info:
+    addr: str
+    boot: datetime
+    online: datetime
 
-    def pack(self) -> bytes:
-        return b"\xbc" + self.expires.to_bytes(2) + self.period.to_bytes(2)
+    def flatten(self) -> Dict[str, Any]:
+        return {
+            "addr": self.addr,
+            "boot": int(self.boot.timestamp()),
+            "online": int(self.online.timestamp()),
+        }
 
 
 @dataclass
+class Host:
+    device: Optional[Device]
+    info: Optional[Info] = None
+
+    def flatten(self) -> Dict[str, Any]:
+        return {
+            "device": {
+                "mac": str(self.device.mac),
+                "base": self.device.base.name,
+                "addr": self.device.addr,
+            }
+            if self.device is not None
+            else None,
+            "info": self.info.flatten() if self.info is not None else None,
+        }
+
+
 class Daemon:
-    devices: Sequence[Device]
+    def __init__(self, devices: Sequence[Device]) -> None:
+        self.hosts = {d.mac: Host(d) for d in devices}
 
     async def run(self) -> None:
-        asyncio.create_task(self._beacon_loop())
+        asyncio.create_task(self._scan_loop())
         print(f"Daemon started")
 
-    async def _beacon_loop(self) -> None:
-        loop = asyncio.get_running_loop()
-
+    async def _scan_loop(self) -> None:
         period = 30
-        msg = Beacon(2 * period, 4)
-        sock = (
-            await loop.create_datagram_endpoint(
-                asyncio.DatagramProtocol,
-                local_addr=("0.0.0.0", 9696),
-                family=socket.AF_INET,
-                reuse_port=True,
-                allow_broadcast=True,
-            )
-        )[0]
         while True:
-            print(f"Beacon")
-            sock.sendto(msg.pack(), ("255.255.255.255", 9696))
+            print(f"Scanning ...")
+            discovered = await find_devices()
+            print(f"Found {len(discovered)} hosts")
+            for mac, info in discovered.items():
+                key = Mac(mac)
+                if key not in self.hosts:
+                    self.hosts[key] = Host(None)
+                host = self.hosts[key]
+                now = datetime.now()
+                host.info = Info(
+                    addr=info.addr,
+                    online=now,
+                    boot=now - timedelta(seconds=info.uptime),
+                )
             await asyncio.sleep(period)
+
+    def flat_hosts(self) -> Dict[str, Any]:
+        return {str(mac): host.flatten() for mac, host in self.hosts.items()}

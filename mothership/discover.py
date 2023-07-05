@@ -46,6 +46,7 @@ async def discover() -> List[Info]:
     )[0]
     sock.sendto(b"\xbc", ("255.255.255.255", 9696))
     await asyncio.sleep(1.0)
+    sock.close()
 
     return hosts
 

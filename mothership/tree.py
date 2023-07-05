@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, Dict
+from typing import Any, List, Dict
 
 from pathlib import Path
 from dataclasses import dataclass
@@ -20,6 +20,11 @@ class Mac:
 
     def __hash__(self) -> int:
         return hash(self.bytes)
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, Mac):
+            raise TypeError(f"`other` must be {Mac}, not {type(other)}")
+        return self.bytes == other.bytes
 
     def __str__(self) -> str:
         return ":".join([f"{b:02x}" for b in self.bytes])
