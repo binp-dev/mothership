@@ -6,7 +6,7 @@ import json
 import toml
 
 import asyncio
-from flask import Flask
+from flask import Flask, Response, send_from_directory
 
 from mothership.config import Config
 from mothership.tree import build_tree
@@ -32,6 +32,16 @@ async def start(serve: Awaitable[None]) -> None:
 
 
 @app.route("/")
-async def root() -> str:
+def root() -> Response:
+    return static_(Path("index.html"))
+
+
+@app.route("/<path:path>")
+def static_(path: Path) -> Response:
+    return send_from_directory(Path(__file__).parent.resolve() / "static", path)
+
+
+@app.route("/hosts")
+def hosts() -> str:
     global DAEMON
     return json.dumps(DAEMON.flat_hosts())

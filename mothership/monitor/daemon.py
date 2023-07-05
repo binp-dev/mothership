@@ -47,10 +47,10 @@ class Daemon:
         self.hosts = {d.mac: Host(d) for d in devices}
 
     async def run(self) -> None:
-        asyncio.create_task(self._scan_loop())
+        asyncio.create_task(self._scan_task())
         print(f"Daemon started")
 
-    async def _scan_loop(self) -> None:
+    async def _scan_task(self) -> None:
         period = 30
         while True:
             print(f"Scanning ...")
