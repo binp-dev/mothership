@@ -1,8 +1,9 @@
 [bases]
 debian = {}
 tornado = { parent = "debian" }
+skifio = { parent = "tornado" }
 
 [hosts]
-"f8:dc:7a:46:04:58" = { base = "tornado" }
-"f8:dc:7a:a4:1c:e8" = { base = "tornado" }
-"f8:dc:7a:a4:1c:f2" = { base = "tornado" }
+"f8:dc:7a:46:04:58" = { base = "skifio" }
+"f8:dc:7a:a4:1c:e8" = { base = "skifio" }
+"f8:dc:7a:a4:1c:f2" = { base = "skifio" }
