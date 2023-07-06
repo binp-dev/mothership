@@ -5,7 +5,7 @@ from pathlib import Path
 from subprocess import run, PIPE
 import shutil
 
-from .tree import Device, HOSTS_PATH
+from mothership.tree import Device, HOSTS_PATH
 
 
 class Overlayfs:

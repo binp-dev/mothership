@@ -4,7 +4,7 @@ from typing import List
 from pathlib import Path
 from subprocess import run
 
-from .tree import Device
+from mothership.tree import Device
 
 EXPORTS_PATH = Path("/etc/exports.d/mothership.exports")
 

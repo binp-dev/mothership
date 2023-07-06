@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
         return 2;
     }
 
-    int lock = open(LOCK_FILE, O_WRONLY);
+    int lock = open(LOCK_FILE, O_CREAT | O_WRONLY);
     if (lock < 0)
     {
         printf("Failed to open lock file: %s\n", LOCK_FILE, strerror(errno));
