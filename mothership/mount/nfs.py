@@ -18,7 +18,10 @@ class Nfs:
         EXPORTS_PATH.parent.mkdir(exist_ok=True)
         with open(EXPORTS_PATH, "w") as f:
             for host in config.hosts:
-                f.write(f"{host.path} *(rw,sync,no_subtree_check,no_root_squash)\n")
+                fsid = "aaaa" + str(host.mac).replace(":", "") + ("0" * 16)
+                f.write(
+                    f"{host.path} *(rw,sync,no_subtree_check,no_root_squash,fsid={fsid})\n"
+                )
         self.refresh()
 
     def unexport(self) -> None:
