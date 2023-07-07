@@ -47,7 +47,7 @@ async def discover() -> List[Info]:
             allow_broadcast=True,
         )
     )[0]
-    sock.sendto(b"\x96\xEC", ("255.255.255.255", 9696))
+    sock.sendto(b"\x96\xB0", ("255.255.255.255", 9696))
     await asyncio.sleep(1.0)
     sock.close()
 

@@ -1,13 +1,10 @@
 from __future__ import annotations
 
-from pathlib import Path
 from argparse import ArgumentParser
-import toml
 
-from .config import Config
 from .mount.nfs import Nfs
 from .mount.overlayfs import Overlayfs
-from .tree import build_tree, FS_PATH
+from .config import Config, FS_PATH
 
 
 parser = ArgumentParser(
@@ -17,7 +14,7 @@ parser = ArgumentParser(
 parser.add_argument(
     "command",
     type=str,
-    choices=["mount", "unmount", "clear"],
+    choices=["mount", "unmount", "clear", "fill"],
     help="Command to run.",
 )
 parser.add_argument(
@@ -33,16 +30,17 @@ assert FS_PATH.exists(), f"Base FS directory not found at {FS_PATH}"
 nfs = Nfs()
 overlayfs = Overlayfs()
 
-if args.command == "mount":
-    assert args.config is not None
-    with open(Path(args.config), "r") as f:
-        config = Config(**toml.load(f))
+if args.config is not None:
+    config = Config.load(args.config)
     print(config)
-    devices = build_tree(config)
+else:
+    config = None
 
+if args.command == "mount":
+    assert config is not None
     nfs.unexport()
-    overlayfs.mount(devices)
-    nfs.export(devices)
+    overlayfs.mount(config)
+    nfs.export(config)
 
 elif args.command == "unmount":
     nfs.unexport()
@@ -50,6 +48,9 @@ elif args.command == "unmount":
 
 elif args.command == "clear":
     overlayfs.clear()
+
+elif args.command == "fill":
+    overlayfs.fill(config)
 
 else:
     raise KeyError(f"Unknown command: {args.command}")

@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 import asyncio
 
-from mothership.tree import Device, Mac
+from mothership.config import Host, Mac
 from mothership.discover import find_devices
 
 
@@ -26,7 +26,7 @@ class Info:
 
 @dataclass
 class Host:
-    device: Optional[Device]
+    device: Optional[Host]
     info: Optional[Info] = None
 
     def flatten(self) -> Dict[str, Any]:
@@ -43,7 +43,7 @@ class Host:
 
 
 class Daemon:
-    def __init__(self, devices: Sequence[Device]) -> None:
+    def __init__(self, devices: Sequence[Host]) -> None:
         self.hosts = {d.mac: Host(d) for d in devices}
 
     async def run(self) -> None:

@@ -9,7 +9,6 @@ import asyncio
 from flask import Flask, Response, send_from_directory
 
 from mothership.config import Config
-from mothership.tree import build_tree
 from .daemon import Daemon
 
 
