@@ -1,8 +1,0 @@
-[Unit]
-Description=Watchdog
-
-[Service]
-ExecStart=/opt/watchdog/watchdog /dev/watchdog0
-
-[Install]
-WantedBy=multi-user.target

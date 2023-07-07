@@ -23,16 +23,19 @@ async def discover() -> List[Info]:
 
         def datagram_received(self, data: bytes, addr: tuple[str | Any, int]) -> None:
             print(f"Received: {data!r} from {addr}")
-            if data.startswith(b"\xbc"):
-                pass
-            elif data.startswith(b"\xcb") and len(data) >= 5:
-                if isinstance(addr[0], str):
-                    uptime = int.from_bytes(data[1:], "big")
-                    hosts.append(Info(addr[0], uptime))
+            if data[0] == 0x96 and len(data) >= 2:
+                if data[1] == 0xEC or data[1] == 0xB0:
+                    pass
+                elif data[1] == 0xCE and len(data) >= 6:
+                    if isinstance(addr[0], str):
+                        uptime = int.from_bytes(data[2:6], "big")
+                        hosts.append(Info(addr[0], uptime))
+                    else:
+                        print("Unsupported address")
                 else:
-                    print("Unsupported address")
+                    print("Unsupported code")
             else:
-                print("Unsupported message")
+                print("Bad format")
 
     loop = asyncio.get_running_loop()
     sock = (
@@ -44,7 +47,7 @@ async def discover() -> List[Info]:
             allow_broadcast=True,
         )
     )[0]
-    sock.sendto(b"\xbc", ("255.255.255.255", 9696))
+    sock.sendto(b"\x96\xEC", ("255.255.255.255", 9696))
     await asyncio.sleep(1.0)
     sock.close()
 

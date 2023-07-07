@@ -1,0 +1,9 @@
+[Unit]
+Description=Sentinel
+
+[Service]
+ExecStart=/opt/sentinel/sentinel /dev/watchdog0
+Restart=no
+
+[Install]
+WantedBy=multi-user.target
