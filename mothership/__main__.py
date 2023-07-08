@@ -1,10 +1,69 @@
 from __future__ import annotations
+from typing import Self, Optional, Callable, Dict
 
+import asyncio
 from argparse import ArgumentParser
 
 from .mount.nfs import Nfs
 from .mount.overlayfs import Overlayfs
 from .config import Config, FS_PATH
+from .discover import print_hosts
+from .monitor.server import run as run_server
+
+
+def command(fn: Callable[[Mothership], None]) -> Callable[[Mothership], None]:
+    setattr(fn, "_is_command", True)
+    return fn
+
+
+class Mothership:
+    def __init__(self, config: Optional[Config] = None) -> None:
+        self.config = config
+        assert FS_PATH.exists(), f"Base FS directory not found at {FS_PATH}"
+        self.nfs = Nfs()
+        self.overlayfs = Overlayfs()
+
+    @classmethod
+    def commands(cls) -> Dict[str, Callable[[Self], None]]:
+        cmds = {}
+        for name in dir(cls):
+            item = getattr(cls, name)
+            if hasattr(item, "_is_command"):
+                cmds[name] = item
+        return cmds
+
+    def run_command(self, name: str) -> None:
+        self.commands()[name](self)
+
+    @command
+    def mount(self) -> None:
+        assert self.config is not None
+        self.nfs.unexport()
+        self.overlayfs.mount(config)
+        self.nfs.export(config)
+
+    @command
+    def unmount(self) -> None:
+        self.nfs.unexport()
+        self.overlayfs.unmount()
+
+    @command
+    def clear(self) -> None:
+        self.overlayfs.clear()
+
+    @command
+    def fill(self) -> None:
+        assert self.config is not None
+        self.overlayfs.fill(self.config)
+
+    @command
+    def discover(self) -> None:
+        print_hosts()
+
+    @command
+    def monitor(self) -> None:
+        assert self.config is not None
+        asyncio.run(run_server(config))
 
 
 parser = ArgumentParser(
@@ -14,7 +73,7 @@ parser = ArgumentParser(
 parser.add_argument(
     "command",
     type=str,
-    choices=["mount", "unmount", "clear", "fill"],
+    choices=Mothership.commands().keys(),
     help="Command to run.",
 )
 parser.add_argument(
@@ -26,9 +85,6 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-assert FS_PATH.exists(), f"Base FS directory not found at {FS_PATH}"
-nfs = Nfs()
-overlayfs = Overlayfs()
 
 if args.config is not None:
     config = Config.load(args.config)
@@ -36,21 +92,4 @@ if args.config is not None:
 else:
     config = None
 
-if args.command == "mount":
-    assert config is not None
-    nfs.unexport()
-    overlayfs.mount(config)
-    nfs.export(config)
-
-elif args.command == "unmount":
-    nfs.unexport()
-    overlayfs.unmount()
-
-elif args.command == "clear":
-    overlayfs.clear()
-
-elif args.command == "fill":
-    overlayfs.fill(config)
-
-else:
-    raise KeyError(f"Unknown command: {args.command}")
+Mothership(config).run_command(args.command)

@@ -1,9 +1,7 @@
 from __future__ import annotations
-from typing import Any, Awaitable
 
 from pathlib import Path
 import json
-import toml
 
 import asyncio
 from flask import Flask, Response, send_from_directory
@@ -15,19 +13,13 @@ from .daemon import Daemon
 DAEMON: Daemon
 
 
-app = Flask(__name__)
-
-
-async def start(serve: Awaitable[None]) -> None:
-    with open(Path("config.toml"), "r") as f:
-        devices = build_tree(Config(**toml.load(f)))
-    print(devices)
-
+async def init(config: Config) -> None:
     global DAEMON
-    DAEMON = Daemon(devices)
+    DAEMON = Daemon(config)
     asyncio.create_task(DAEMON.run())
 
-    await serve
+
+app = Flask(__name__)
 
 
 @app.route("/")

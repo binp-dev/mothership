@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 
 import asyncio
 
-from mothership.config import Host, Mac
-from mothership.discover import find_devices
+from mothership.config import Config, Host, Mac
+from mothership.discover import find_hosts
 
 
 @dataclass
@@ -25,26 +25,26 @@ class Info:
 
 
 @dataclass
-class Host:
-    device: Optional[Host]
+class HostInfo:
+    host: Optional[Host]
     info: Optional[Info] = None
 
     def flatten(self) -> Dict[str, Any]:
         return {
-            "device": {
-                "mac": str(self.device.mac),
-                "base": self.device.base.name,
-                "addr": self.device.addr,
+            "host": {
+                "mac": str(self.host.mac),
+                **({"base": self.host.base.name} if self.host.base is not None else {}),
+                **({"addr": self.host.addr} if self.host.addr is not None else {}),
             }
-            if self.device is not None
+            if self.host is not None
             else None,
             "info": self.info.flatten() if self.info is not None else None,
         }
 
 
 class Daemon:
-    def __init__(self, devices: Sequence[Host]) -> None:
-        self.hosts = {d.mac: Host(d) for d in devices}
+    def __init__(self, config: Config) -> None:
+        self.hosts = {host.mac: HostInfo(host) for host in config.hosts}
 
     async def run(self) -> None:
         asyncio.create_task(self._scan_task())
@@ -54,12 +54,12 @@ class Daemon:
         period = 30
         while True:
             print(f"Scanning ...")
-            discovered = await find_devices()
+            discovered = await find_hosts()
             print(f"Found {len(discovered)} hosts")
             for mac, info in discovered.items():
                 key = Mac(mac)
                 if key not in self.hosts:
-                    self.hosts[key] = Host(None)
+                    self.hosts[key] = HostInfo(None)
                 host = self.hosts[key]
                 now = datetime.now()
                 host.info = Info(

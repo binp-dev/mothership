@@ -47,7 +47,7 @@ async def discover() -> List[Info]:
             allow_broadcast=True,
         )
     )[0]
-    sock.sendto(b"\x96\xB0", ("255.255.255.255", 9696))
+    sock.sendto(b"\x96\xEC", ("255.255.255.255", 9696))
     await asyncio.sleep(1.0)
     sock.close()
 
@@ -65,7 +65,7 @@ def get_macs(addrs: Sequence[str]) -> List[str | None]:
     return [addr_to_mac.get(a) for a in addrs]
 
 
-async def find_devices() -> Dict[str, Info]:
+async def find_hosts() -> Dict[str, Info]:
     devices: Dict[str, Info] = {}
     discovered = await discover()
     macs = get_macs([i.addr for i in discovered])
@@ -78,7 +78,11 @@ async def find_devices() -> Dict[str, Info]:
     return devices
 
 
-if __name__ == "__main__":
-    for mac, info in asyncio.run(find_devices()).items():
+def print_hosts() -> None:
+    for mac, info in asyncio.run(find_hosts()).items():
         print(f"MAC\tIP\tUptime")
         print(f"{mac}\t{info.addr}\t{info.uptime} sec")
+
+
+if __name__ == "__main__":
+    print_hosts()
