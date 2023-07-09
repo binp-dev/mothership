@@ -1,6 +1,59 @@
-.host {
-    margin: 8px;
+body {
+    background-color: #CCCCCC;
+}
+
+a {
+    color: #000088;
+    text-decoration: none;
+}
+
+a:link,
+a:visited {}
+
+a:hover,
+a:active {
+    text-decoration: underline;
+}
+
+b {
+    font-weight: 600;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+    font-family: "Noto Sans", sans-serif;
+}
+
+#hosts {
     padding: 4px;
-    background-color: #ffffff;
-    box-shadow: 0 0 8px -2px #000000;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.host {
+    display: inline-block;
+    margin: 8px;
+    padding: 8px;
+    overflow: hidden;
+
+    color: #ffffff;
+    background-color: #888877;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1);
+}
+
+.host.known {
+    background-color: #008822;
+}
+
+.host.known.error {
+    background-color: #AA2200;
+}
+
+.host.known.warning {
+    background-color: #AA8800;
+}
+
+.mac {
+    font-family: "Noto Sans Mono", monospace;
 }

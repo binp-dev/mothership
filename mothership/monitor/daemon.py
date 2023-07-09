@@ -6,12 +6,12 @@ from datetime import datetime, timedelta
 
 import asyncio
 
-from mothership.config import Config, Host, Mac
+from mothership.config import Config, Host as HostConfig, Mac
 from mothership.discover import find_hosts
 
 
 @dataclass
-class Info:
+class Status:
     addr: str
     boot: datetime
     online: datetime
@@ -25,26 +25,30 @@ class Info:
 
 
 @dataclass
-class HostInfo:
-    host: Optional[Host]
-    info: Optional[Info] = None
+class Host:
+    config: Optional[HostConfig]
+    status: Optional[Status] = None
 
     def flatten(self) -> Dict[str, Any]:
         return {
-            "host": {
-                "mac": str(self.host.mac),
-                **({"base": self.host.base.name} if self.host.base is not None else {}),
-                **({"addr": self.host.addr} if self.host.addr is not None else {}),
+            "config": {
+                "mac": str(self.config.mac),
+                **(
+                    {"base": self.config.base.name}
+                    if self.config.base is not None
+                    else {}
+                ),
+                **({"addr": self.config.addr} if self.config.addr is not None else {}),
             }
-            if self.host is not None
+            if self.config is not None
             else None,
-            "info": self.info.flatten() if self.info is not None else None,
+            "status": self.status.flatten() if self.status is not None else None,
         }
 
 
 class Daemon:
     def __init__(self, config: Config) -> None:
-        self.hosts = {host.mac: HostInfo(host) for host in config.hosts}
+        self.hosts = {hc.mac: Host(hc) for hc in config.hosts}
 
     async def run(self) -> None:
         asyncio.create_task(self._scan_task())
@@ -59,10 +63,10 @@ class Daemon:
             for mac, info in discovered.items():
                 key = Mac(mac)
                 if key not in self.hosts:
-                    self.hosts[key] = HostInfo(None)
+                    self.hosts[key] = Host(None)
                 host = self.hosts[key]
                 now = datetime.now()
-                host.info = Info(
+                host.status = Status(
                     addr=info.addr,
                     online=now,
                     boot=now - timedelta(seconds=info.uptime),

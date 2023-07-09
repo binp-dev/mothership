@@ -36,15 +36,28 @@ const render = (hosts) => {
 }
 
 const update_host_element = (elem, mac, host) => {
-    html = `<div class="mac">MAC: ${mac}</div>`;
-    if (host.device !== undefined && host.device !== null) {
-        html += `<div>Name: ${host.device.name}</div>`
-        html += `<div>Base: ${host.device.base}</div>`;
+    html = `<div class="mac">${mac.toUpperCase()}</div>`;
+
+    elem.classList.remove("known", "warning", "error");
+
+    if (host.config !== undefined && host.config !== null) {
+        html += `<div>Type: ${host.config.base}</div>`;
+        elem.classList.add("known");
+    } else {
+        html += `<div>Not in config</div>`;
     }
-    if (host.info !== undefined && host.info !== null) {
-        html += `<div>IP: ${host.info.addr}</div>`
-        html += `<div>Boot: ${seconds_to_date(host.info.boot)}</div>`;
-        html += `<div>Online: ${seconds_to_date(host.info.online)}</div>`;
+
+    if (host.status !== undefined && host.status !== null) {
+        html += `<div>${host.status.addr}</div>`
+        html += `<div>Booted: ${format_date(seconds_to_date(host.status.boot))}</div>`;
+        const online = seconds_to_date(host.status.online);
+        if (!is_now(online)) {
+            html += `<div>Last seen: ${format_date(online)}</div>`;
+            elem.classList.add("error");
+        }
+    } else {
+        html += `<div>Offline</div>`;
+        elem.classList.add("error");
     }
     elem.innerHTML = html;
 }
@@ -53,6 +66,28 @@ const seconds_to_date = (seconds) => {
     let date = new Date(0);
     date.setUTCSeconds(seconds);
     return date;
+}
+
+const is_now = (date) => {
+    return new Date() - date < (60 * 1000);
+}
+
+const format_date = (date) => {
+    const recently = 24 * 60;
+    let m = Math.floor((new Date() - date) / (60 * 1000));
+    if (m < recently) {
+        let h = Math.floor(m / 60);
+        m = m % 60;
+        return (h != 0 ? h + "h " : "")
+            + (m != 0 || h == 0 ? m + "m " : "")
+            + "ago";
+    } else {
+        return ("0" + date.getDate()).slice(-2) + "-"
+            + ("0" + (date.getMonth() + 1)).slice(-2) + "-"
+            + date.getFullYear() + " "
+            + ("0" + date.getHours()).slice(-2) + ":"
+            + ("0" + date.getMinutes()).slice(-2);
+    }
 }
 
 window.onload = main;
