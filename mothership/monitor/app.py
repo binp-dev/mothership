@@ -22,7 +22,7 @@ class App(web.Application):
             [
                 web.get("/hosts", self.hosts),
                 web.get("/", self.index),
-                web.static("/", self.files_path),
+                web.static("/", self.files_path, append_version=True),
             ]
         )
 
@@ -37,8 +37,4 @@ class App(web.Application):
         await runner.setup()
         site = web.TCPSite(runner, addr[0], addr[1])
         await site.start()
-
-        try:
-            await self.daemon.run()
-        finally:
-            await runner.cleanup()
+        await self.daemon.run()

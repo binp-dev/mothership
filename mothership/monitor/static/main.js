@@ -36,7 +36,7 @@ const render = (hosts) => {
 }
 
 const update_host_element = (elem, mac, host) => {
-    html = `<div class="mac">${mac.toUpperCase()}</div>`;
+    let html = `<div class="mac">${mac.toUpperCase()}</div>`;
 
     elem.classList.remove("known", "warning", "error");
 
