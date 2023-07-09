@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     }
     struct sockaddr_in local_addr;
     local_addr.sin_family = AF_INET;
-    local_addr.sin_addr.s_addr = htonl(INADDR_BROADCAST);
+    local_addr.sin_addr.s_addr = INADDR_ANY;
     local_addr.sin_port = htons(9696);
     int one = 1;
     if (bind(sock, (struct sockaddr *)&local_addr, sizeof(local_addr)) != 0 && //

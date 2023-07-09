@@ -7,7 +7,7 @@ import json
 import asyncio
 from aiohttp import web
 
-from mothership.config import Config
+from mothership.config import Config, Mac
 from .daemon import Daemon
 
 
@@ -43,6 +43,11 @@ class App(web.Application):
                 print(msg)
                 if msg.type == web.WSMsgType.TEXT:
                     print(f"Websocket message: {msg.data}")
+                    req = json.loads(msg.data)
+                    if req["type"] == "reboot":
+                        self.daemon.reboot(Mac(req["target"]))
+                    else:
+                        print(f"Unknown request type")
                 elif msg.type == web.WSMsgType.CLOSE:
                     break
         finally:

@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import asyncio
 
 from mothership.config import Config, Host as HostConfig, Mac
-from mothership.discover import find_hosts
+from mothership.beacon import Beacon
 
 
 @dataclass
@@ -52,21 +52,23 @@ class Daemon:
         config: Config,
         notify: Optional[Callable[[], Awaitable[None]]],
     ) -> None:
+        self.beacon: Beacon
         self.hosts = {hc.mac: Host(hc) for hc in config.hosts}
         self.notify = notify
 
     async def run(self) -> None:
         print(f"Starting daemon")
+        self.beacon = await Beacon.connect()
         await self._scan_task()
 
     async def _scan_task(self) -> None:
         period = 10
         while True:
             print(f"Scanning ...")
-            discovered = await find_hosts()
+            discovered = await self.beacon.find_hosts()
             print(f"Found {len(discovered)} hosts")
-            for mac, info in discovered.items():
-                key = Mac(mac)
+            for info in discovered:
+                key = Mac(info.mac)
                 if key not in self.hosts:
                     self.hosts[key] = Host(None)
                 host = self.hosts[key]
@@ -74,11 +76,16 @@ class Daemon:
                 host.status = Status(
                     addr=info.addr,
                     online=now,
-                    boot=now - timedelta(seconds=info.uptime),
+                    boot=(now - timedelta(seconds=info.status.uptime)),
                 )
             if self.notify is not None:
                 await self.notify()
             await asyncio.sleep(period)
+
+    def reboot(self, mac: Mac) -> None:
+        host = self.hosts[mac]
+        assert host.status is not None
+        self.beacon.reboot(host.status.addr)
 
     def flat_hosts(self) -> Dict[str, Any]:
         return {str(mac): host.flatten() for mac, host in self.hosts.items()}

@@ -2,6 +2,8 @@ const main = () => {
     subscribe();
 }
 
+let socket = undefined;
+
 const subscribe = () => {
     const timeout = 10 * 1000;
 
@@ -10,7 +12,7 @@ const subscribe = () => {
 
     const loc = window.location;
     const proto = loc.protocol == "https" ? "wss" : "ws";
-    let socket = new WebSocket(`${proto}://${loc.hostname}:${loc.port}/websocket`);
+    socket = new WebSocket(`${proto}://${loc.hostname}:${loc.port}/websocket`);
     socket.onopen = (e) => {
         console.log("Websocket connected");
         notify.classList.add("hidden");
@@ -32,6 +34,10 @@ const subscribe = () => {
         console.log("Websocket received:", e.data);
         render(JSON.parse(e.data));
     };
+}
+
+const reboot = (mac) => {
+    socket.send(`{"type": "reboot", "target": "${mac}"}`)
 }
 
 const render = (hosts) => {
@@ -61,9 +67,12 @@ const update_host_element = (elem, mac, host) => {
         html += `<div>Not in config</div>`;
     }
 
+    let rebootable = false;
     if (host.status !== undefined && host.status !== null) {
         html += `<div>${host.status.addr}</div>`
         html += `<div>Booted: ${format_date(seconds_to_date(host.status.boot))}</div>`;
+        html += `<button class="reboot">Reboot</button>`;
+        rebootable = true;
         const online = seconds_to_date(host.status.online);
         if (!is_now(online)) {
             html += `<div>Last seen: ${format_date(online)}</div>`;
@@ -74,6 +83,9 @@ const update_host_element = (elem, mac, host) => {
         elem.classList.add("error");
     }
     elem.innerHTML = html;
+    if (rebootable) {
+        elem.querySelector(".reboot").onclick = () => { reboot(mac) };
+    }
 }
 
 const seconds_to_date = (seconds) => {
