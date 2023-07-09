@@ -8,7 +8,7 @@ from .mount.nfs import Nfs
 from .mount.overlayfs import Overlayfs
 from .config import Config, FS_PATH
 from .discover import print_hosts
-from .monitor.server import run as run_server
+from .monitor.app import App as Monitor
 
 
 def command(fn: Callable[[Mothership], None]) -> Callable[[Mothership], None]:
@@ -63,7 +63,7 @@ class Mothership:
     @command
     def monitor(self) -> None:
         assert self.config is not None
-        asyncio.run(run_server(config))
+        asyncio.run(Monitor(config).run(("0.0.0.0", 5000)))
 
 
 parser = ArgumentParser(

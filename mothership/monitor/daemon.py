@@ -51,8 +51,8 @@ class Daemon:
         self.hosts = {hc.mac: Host(hc) for hc in config.hosts}
 
     async def run(self) -> None:
-        asyncio.create_task(self._scan_task())
-        print(f"Daemon started")
+        print(f"Starting daemon")
+        await self._scan_task()
 
     async def _scan_task(self) -> None:
         period = 30

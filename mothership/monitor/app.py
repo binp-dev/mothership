@@ -1,38 +1,44 @@
 from __future__ import annotations
+from typing import Tuple
 
 from pathlib import Path
 import json
 
 import asyncio
-from flask import Flask, Response, send_from_directory
+from aiohttp import web
 
 from mothership.config import Config
 from .daemon import Daemon
 
 
-DAEMON: Daemon
+class App(web.Application):
+    def __init__(self, config: Config) -> None:
+        super().__init__()
 
+        self.daemon = Daemon(config)
 
-async def init(config: Config) -> None:
-    global DAEMON
-    DAEMON = Daemon(config)
-    asyncio.create_task(DAEMON.run())
+        self.files_path = Path(__file__).parent.resolve() / "static"
+        self.add_routes(
+            [
+                web.get("/hosts", self.hosts),
+                web.get("/", self.index),
+                web.static("/", self.files_path),
+            ]
+        )
 
+    async def index(self, request: web.Request) -> web.FileResponse:
+        return web.FileResponse(self.files_path / "index.html")
 
-app = Flask(__name__)
+    async def hosts(self, request: web.Request) -> web.Response:
+        return web.Response(text=json.dumps(self.daemon.flat_hosts()))
 
+    async def run(self, addr: Tuple[str, int]) -> None:
+        runner = web.AppRunner(self)
+        await runner.setup()
+        site = web.TCPSite(runner, addr[0], addr[1])
+        await site.start()
 
-@app.route("/")
-def root() -> Response:
-    return static_(Path("index.html"))
-
-
-@app.route("/<path:path>")
-def static_(path: Path) -> Response:
-    return send_from_directory(Path(__file__).parent.resolve() / "static", path)
-
-
-@app.route("/hosts")
-def hosts() -> str:
-    global DAEMON
-    return json.dumps(DAEMON.flat_hosts())
+        try:
+            await self.daemon.run()
+        finally:
+            await runner.cleanup()
