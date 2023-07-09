@@ -4,7 +4,7 @@ const main = () => {
     request(render);
 }
 
-const request = (callback) => {
+const request = (callback: (data: any) => void) => {
     const xhr = new XMLHttpRequest();
     xhr.open("GET", "/hosts", true);
     xhr.onload = (e) => {
@@ -22,7 +22,19 @@ const request = (callback) => {
     xhr.send(null);
 }
 
-const render = (hosts) => {
+type Host = {
+    mac: string,
+    config?: {
+        base: string,
+    } | null,
+    status?: {
+        addr: string,
+        boot: number,
+        online: number,
+    } | null,
+};
+
+const render = (hosts: Host[]) => {
     const root = document.getElementById("hosts");
     for (const mac in hosts) {
         const host = hosts[mac]
@@ -37,7 +49,7 @@ const render = (hosts) => {
     }
 }
 
-const update_host_element = (elem, mac, host) => {
+const update_host_element = (elem: Element, mac: string, host: Host) => {
     let html = `<div class="mac">${mac.toUpperCase()}</div>`;
 
     elem.classList.remove("known", "warning", "error");
@@ -65,19 +77,19 @@ const update_host_element = (elem, mac, host) => {
     elem.innerHTML = html;
 }
 
-const seconds_to_date = (seconds) => {
+const seconds_to_date = (seconds: number): Date => {
     let date = new Date(0);
     date.setUTCSeconds(seconds);
     return date;
 }
 
-const is_now = (date) => {
-    return new Date() - date < (60 * 1000);
+const is_now = (date: Date): boolean => {
+    return (new Date().getTime() - date.getTime()) < (60 * 1000);
 }
 
-const format_date = (date) => {
+const format_date = (date: Date): string => {
     const recently = 24 * 60;
-    let m = Math.floor((new Date() - date) / (60 * 1000));
+    let m = Math.floor((new Date().getTime() - date.getTime()) / (60 * 1000));
     if (m < recently) {
         let h = Math.floor(m / 60);
         m = m % 60;
