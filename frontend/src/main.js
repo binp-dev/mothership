@@ -1,3 +1,5 @@
+import { io } from "socket.io-client";
+
 const main = () => {
     request(render);
 }
@@ -36,7 +38,7 @@ const render = (hosts) => {
 }
 
 const update_host_element = (elem, mac, host) => {
-    html = `<div class="mac">${mac.toUpperCase()}</div>`;
+    let html = `<div class="mac">${mac.toUpperCase()}</div>`;
 
     elem.classList.remove("known", "warning", "error");
 
@@ -59,6 +61,7 @@ const update_host_element = (elem, mac, host) => {
         html += `<div>Offline</div>`;
         elem.classList.add("error");
     }
+
     elem.innerHTML = html;
 }
 

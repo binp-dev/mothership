@@ -29,7 +29,7 @@ def root() -> Response:
 
 @app.route("/<path:path>")
 def static_(path: Path) -> Response:
-    return send_from_directory(Path(__file__).parent.resolve() / "static", path)
+    return send_from_directory(Path.cwd() / "frontend/dist", path)
 
 
 @app.route("/hosts")
