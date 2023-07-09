@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Optional, Sequence, Dict
+from typing import Any, Optional, Dict, Callable, Awaitable
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -47,15 +47,20 @@ class Host:
 
 
 class Daemon:
-    def __init__(self, config: Config) -> None:
+    def __init__(
+        self,
+        config: Config,
+        notify: Optional[Callable[[], Awaitable[None]]],
+    ) -> None:
         self.hosts = {hc.mac: Host(hc) for hc in config.hosts}
+        self.notify = notify
 
     async def run(self) -> None:
         print(f"Starting daemon")
         await self._scan_task()
 
     async def _scan_task(self) -> None:
-        period = 30
+        period = 10
         while True:
             print(f"Scanning ...")
             discovered = await find_hosts()
@@ -71,6 +76,8 @@ class Daemon:
                     online=now,
                     boot=now - timedelta(seconds=info.uptime),
                 )
+            if self.notify is not None:
+                await self.notify()
             await asyncio.sleep(period)
 
     def flat_hosts(self) -> Dict[str, Any]:

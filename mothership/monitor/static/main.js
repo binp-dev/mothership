@@ -1,23 +1,28 @@
 const main = () => {
-    request(render);
+    subscribe(render);
 }
 
-const request = (callback) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("GET", "/hosts", true);
-    xhr.onload = (e) => {
-        if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
-                callback(JSON.parse(xhr.responseText));
-            } else {
-                console.error(xhr.statusText);
-            }
+const subscribe = (callback) => {
+    const loc = window.location;
+    const proto = loc.protocol == "https" ? "wss" : "ws";
+    let socket = new WebSocket(`${proto}://${loc.hostname}:${loc.port}/websocket`);
+    socket.onopen = (event) => {
+        console.log("Websocket connected");
+    };
+    socket.onmessage = (event) => {
+        console.log(`Websocket received: ${event.data}`);
+        callback(JSON.parse(event.data));
+    };
+    socket.onclose = (event) => {
+        if (event.wasClean) {
+            console.log("Websocket disconnected");
+        } else {
+            console.error("Websocket connection died");
         }
     };
-    xhr.onerror = (e) => {
-        console.error(xhr.statusText);
+    socket.onerror = (error) => {
+        console.error(`Websocket error: ${error}`);
     };
-    xhr.send(null);
 }
 
 const render = (hosts) => {
