@@ -1,27 +1,36 @@
 const main = () => {
-    subscribe(render);
+    subscribe();
 }
 
-const subscribe = (callback) => {
+const subscribe = () => {
+    const timeout = 10 * 1000;
+
+    const notify = document.getElementById("notify");
+    notify.innerText = "Connecting ...";
+
     const loc = window.location;
     const proto = loc.protocol == "https" ? "wss" : "ws";
     let socket = new WebSocket(`${proto}://${loc.hostname}:${loc.port}/websocket`);
-    socket.onopen = (event) => {
+    socket.onopen = (e) => {
         console.log("Websocket connected");
+        notify.classList.add("hidden");
     };
-    socket.onmessage = (event) => {
-        console.log(`Websocket received: ${event.data}`);
-        callback(JSON.parse(event.data));
+    socket.onerror = (e) => {
+        console.error("Websocket error:", e);
     };
-    socket.onclose = (event) => {
-        if (event.wasClean) {
+    socket.onclose = (e) => {
+        if (e.wasClean) {
             console.log("Websocket disconnected");
         } else {
             console.error("Websocket connection died");
         }
+        notify.innerText = "Reconnecting ...";
+        notify.classList.remove("hidden");
+        setTimeout(subscribe, timeout);
     };
-    socket.onerror = (error) => {
-        console.error(`Websocket error: ${error}`);
+    socket.onmessage = (e) => {
+        console.log("Websocket received:", e.data);
+        render(JSON.parse(e.data));
     };
 }
 
