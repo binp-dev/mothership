@@ -5,11 +5,14 @@
     <meta charset="utf-8" />
     <title>Monitor</title>
     <link rel="stylesheet" type="text/css" href="styles.css" />
+    <link rel="stylesheet" type="text/css" href="spinner.css" />
     <script type="module" src="main.js"></script>
 </head>
 
 <body>
-    <div id="notify"></div>
+    <div id="notify">
+        <div class="spinner"></div>&nbsp<span id="notify-text">Connecting ...</span>
+    </div>
     <div id="hosts"></div>
 </body>
 

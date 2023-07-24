@@ -8,7 +8,6 @@ const subscribe = () => {
     const timeout = 4 * 1000;
 
     const notify = document.getElementById("notify");
-    notify.innerText = "Connecting ...";
 
     const loc = window.location;
     const proto = loc.protocol == "https" ? "wss" : "ws";
@@ -16,7 +15,7 @@ const subscribe = () => {
     socket.onopen = (e) => {
         console.log("Websocket connected");
         notify.classList.add("hidden");
-        notify.innerText = "Reconnecting ...";
+        document.getElementById("notify-text").innerText = "Reconnecting ...";
     };
     socket.onerror = (e) => {
         console.error("Websocket error:", e);

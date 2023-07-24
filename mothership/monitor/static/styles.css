@@ -28,10 +28,10 @@ body {
 #notify {
     position: absolute;
     display: inline-block;
-    background-color: #ffffff;
-    border: 2px solid #440000;
     padding: 4px;
     font-size: 24px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
 }
 
 #notify.hidden {
@@ -52,7 +52,7 @@ body {
 
     color: #ffffff;
     background-color: #888877;
-    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.2);
 }
 
 .host.known {
