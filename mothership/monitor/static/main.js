@@ -5,7 +5,7 @@ const main = () => {
 let socket = undefined;
 
 const subscribe = () => {
-    const timeout = 10 * 1000;
+    const timeout = 4 * 1000;
 
     const notify = document.getElementById("notify");
     notify.innerText = "Connecting ...";
@@ -16,6 +16,7 @@ const subscribe = () => {
     socket.onopen = (e) => {
         console.log("Websocket connected");
         notify.classList.add("hidden");
+        notify.innerText = "Reconnecting ...";
     };
     socket.onerror = (e) => {
         console.error("Websocket error:", e);
@@ -26,7 +27,6 @@ const subscribe = () => {
         } else {
             console.error("Websocket connection died");
         }
-        notify.innerText = "Reconnecting ...";
         notify.classList.remove("hidden");
         setTimeout(subscribe, timeout);
     };
@@ -99,21 +99,24 @@ const is_now = (date) => {
 }
 
 const format_date = (date) => {
+    const full = ("0" + date.getDate()).slice(-2) + "-"
+        + ("0" + (date.getMonth() + 1)).slice(-2) + "-"
+        + date.getFullYear() + " "
+        + ("0" + date.getHours()).slice(-2) + ":"
+        + ("0" + date.getMinutes()).slice(-2);
+    let text = full;
+
     const recently = 24 * 60;
     let m = Math.floor((new Date() - date) / (60 * 1000));
     if (m < recently) {
         let h = Math.floor(m / 60);
         m = m % 60;
-        return (h != 0 ? h + "h " : "")
+        text = (h != 0 ? h + "h " : "")
             + (m != 0 || h == 0 ? m + "m " : "")
             + "ago";
-    } else {
-        return ("0" + date.getDate()).slice(-2) + "-"
-            + ("0" + (date.getMonth() + 1)).slice(-2) + "-"
-            + date.getFullYear() + " "
-            + ("0" + date.getHours()).slice(-2) + ":"
-            + ("0" + date.getMinutes()).slice(-2);
     }
+
+    return `<span class="date" title="${full}">${text}</span>`;
 }
 
 window.onload = main;
