@@ -2,11 +2,11 @@ const main = () => {
     subscribe();
 }
 
+const TIMEOUT = 4 * 1000;
+
 let socket = undefined;
 
 const subscribe = () => {
-    const timeout = 4 * 1000;
-
     const notify = document.getElementById("notify");
 
     const loc = window.location;
@@ -27,7 +27,7 @@ const subscribe = () => {
             console.error("Websocket connection died");
         }
         notify.classList.remove("hidden");
-        setTimeout(subscribe, timeout);
+        setTimeout(subscribe, TIMEOUT);
     };
     socket.onmessage = (e) => {
         console.log("Websocket received:", e.data);
@@ -54,10 +54,12 @@ const render = (hosts) => {
     }
 }
 
+const RECENTLY = 24 * 60;
+
 const update_host_element = (elem, mac, host) => {
     let html = `<div class="mac">${mac.toUpperCase()}</div>`;
 
-    elem.classList.remove("known", "warning", "error");
+    elem.classList.remove("recent", "known", "warning", "error");
 
     if (host.config !== undefined && host.config !== null) {
         html += `<div>Type: ${host.config.base}</div>`;
@@ -68,19 +70,29 @@ const update_host_element = (elem, mac, host) => {
 
     let rebootable = false;
     if (host.status !== undefined && host.status !== null) {
+        const boot = seconds_to_date(host.status.boot);
         html += `<div>${host.status.addr}</div>`
-        html += `<div>Booted: ${format_date(seconds_to_date(host.status.boot))}</div>`;
+        html += `<div>Booted: ${format_date(boot)}</div>`;
         html += `<button class="reboot">Reboot</button>`;
         rebootable = true;
         const online = seconds_to_date(host.status.online);
         if (!is_now(online)) {
             html += `<div>Last seen: ${format_date(online)}</div>`;
             elem.classList.add("error");
+            if (is_recent(online)) {
+                elem.classList.add("recent");
+            }
+        } else {
+            if (is_recent(boot)) {
+                elem.classList.add("recent");
+            }
         }
+
     } else {
         html += `<div>Offline</div>`;
         elem.classList.add("error");
     }
+
     elem.innerHTML = html;
     if (rebootable) {
         elem.querySelector(".reboot").onclick = () => { reboot(mac) };
@@ -93,8 +105,16 @@ const seconds_to_date = (seconds) => {
     return date;
 }
 
+const _minutes_passed = (date) => {
+    return Math.floor((new Date() - date) / (60 * 1000));
+}
+
 const is_now = (date) => {
-    return new Date() - date < (60 * 1000);
+    return _minutes_passed(date) < 1;
+}
+
+const is_recent = (date) => {
+    return _minutes_passed(date) < RECENTLY;
 }
 
 const format_date = (date) => {
@@ -105,9 +125,8 @@ const format_date = (date) => {
         + ("0" + date.getMinutes()).slice(-2);
     let text = full;
 
-    const recently = 24 * 60;
-    let m = Math.floor((new Date() - date) / (60 * 1000));
-    if (m < recently) {
+    let m = _minutes_passed(date);
+    if (m < RECENTLY) {
         let h = Math.floor(m / 60);
         m = m % 60;
         text = (h != 0 ? h + "h " : "")

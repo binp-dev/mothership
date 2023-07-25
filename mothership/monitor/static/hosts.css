@@ -1,0 +1,42 @@
+#hosts {
+    padding: 4px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.host {
+    display: inline-block;
+    margin: 8px;
+    padding: 8px;
+    overflow: hidden;
+
+    color: #ffffff;
+    background-color: #888877;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.2);
+
+    backdrop-filter: brightness(50%);
+}
+
+.host.known {
+    background-color: #008822;
+}
+
+.host.known.recent {
+    background-color: #009926;
+}
+
+.host.known.warning {
+    background-color: #aa8800;
+}
+
+.host.known.warning.recent {
+    background-color: #bb9500;
+}
+
+.host.known.error {
+    background-color: #aa2200;
+}
+
+.host.known.error.recent {
+    background-color: #bb2500;
+}
