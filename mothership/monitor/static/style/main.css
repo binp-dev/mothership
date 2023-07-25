@@ -1,3 +1,4 @@
+@import "top.css";
 @import "hosts.css";
 @import "spinner.css";
 
@@ -29,12 +30,20 @@ body {
 }
 
 #notify {
-    position: absolute;
+    position: fixed;
     display: inline-block;
+
+    top: 0;
     padding: 4px;
+
+    /* To center position:fixed element */
+    left: 50%;
+    transform: translateX(-50%);
+
     font-size: 24px;
     background-color: #ffffff;
     box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+    z-index: 100;
 }
 
 #notify.hidden {

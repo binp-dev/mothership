@@ -1,4 +1,5 @@
 import { seconds_to_date, is_now, is_recent, format_date } from "./utils.js";
+import { CONTEXT } from "./context.js";
 
 export const render = (hosts) => {
     const root = document.getElementById("hosts");
@@ -58,6 +59,6 @@ const update_host_element = (elem, mac, host) => {
     }
 }
 
-const reboot = (mac) => {
-    socket.send(`{"type": "reboot", "target": "${mac}"}`)
+export const reboot = (mac) => {
+    CONTEXT.socket.send(`{"type": "reboot", "target": "${mac}"}`)
 }

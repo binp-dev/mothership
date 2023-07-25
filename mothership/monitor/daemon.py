@@ -83,9 +83,14 @@ class Daemon:
             await asyncio.sleep(period)
 
     def reboot(self, mac: Mac) -> None:
+        print(f"Rebooting host {mac}")
         host = self.hosts[mac]
         assert host.status is not None
         self.beacon.reboot(host.status.addr)
+
+    def reboot_all(self) -> None:
+        print("Rebooting all hosts")
+        self.beacon.reboot("255.255.255.255")
 
     def flat_hosts(self) -> Dict[str, Any]:
         return {str(mac): host.flatten() for mac, host in self.hosts.items()}

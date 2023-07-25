@@ -1,5 +1,7 @@
 #hosts {
+    margin: 0;
     padding: 4px;
+    padding-top: 40px;
     display: flex;
     flex-wrap: wrap;
 }

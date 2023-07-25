@@ -45,7 +45,10 @@ class App(web.Application):
                     print(f"Websocket message: {msg.data}")
                     req = json.loads(msg.data)
                     if req["type"] == "reboot":
-                        self.daemon.reboot(Mac(req["target"]))
+                        if req["target"] == "all":
+                            self.daemon.reboot_all()
+                        else:
+                            self.daemon.reboot(Mac(req["target"]))
                     else:
                         print(f"Unknown request type")
                 elif msg.type == web.WSMsgType.CLOSE:

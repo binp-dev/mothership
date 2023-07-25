@@ -1,20 +1,21 @@
-import { render } from "./hosts.js";
+import { CONTEXT } from "./context.js";
+import { render, reboot } from "./hosts.js";
 
 const main = () => {
+    document.getElementById("reboot-all").onclick = () => { reboot("all") };
     subscribe();
 }
 
-const RETRY_TIMEOUT = 4 * 1000;
-
-let socket = undefined;
+const RETRY_TIMEOUT = 10 * 1000;
 
 const subscribe = () => {
     const notify = document.getElementById("notify");
 
     const loc = window.location;
     const proto = loc.protocol == "https" ? "wss" : "ws";
-    socket = new WebSocket(`${proto}://${loc.hostname}:${loc.port}/websocket`);
+    const socket = new WebSocket(`${proto}://${loc.hostname}:${loc.port}/websocket`);
     socket.onopen = (e) => {
+        CONTEXT.socket = socket;
         console.log("Websocket connected");
         notify.classList.add("hidden");
         document.getElementById("notify-text").innerText = "Reconnecting ...";
@@ -23,6 +24,7 @@ const subscribe = () => {
         console.error("Websocket error:", e);
     };
     socket.onclose = (e) => {
+        CONTEXT.socket = null;
         if (e.wasClean) {
             console.log("Websocket disconnected");
         } else {
