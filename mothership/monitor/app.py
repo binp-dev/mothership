@@ -7,7 +7,8 @@ import json
 import asyncio
 from aiohttp import web
 
-from mothership.config import Config, Mac
+from mothership.hosts import Mac
+from mothership.config import Config
 from .daemon import Daemon
 
 
@@ -38,7 +39,7 @@ class App(web.Application):
         self.clients.append(ws)
 
         try:
-            await ws.send_str(json.dumps(self.daemon.flat_hosts()))
+            await ws.send_str(json.dumps(self.daemon.dump_hosts()))
             async for msg in ws:
                 print(msg)
                 if msg.type == web.WSMsgType.TEXT:
@@ -61,7 +62,7 @@ class App(web.Application):
         return ws
 
     async def _daemon_updated(self) -> None:
-        data = json.dumps(self.daemon.flat_hosts())
+        data = json.dumps(self.daemon.dump_hosts())
         count = 0
         for ws in self.clients:
             try:

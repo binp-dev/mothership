@@ -20,14 +20,14 @@ def get_macs(addrs: List[str]) -> List[str | None]:
 
 
 @dataclass
-class Host:
+class Reflex:
     mac: str
     addr: str
-    status: Status
+    info: Info
 
 
 @dataclass
-class Status:
+class Info:
     uptime: int
 
 
@@ -39,7 +39,7 @@ class Beacon:
 
     class BeaconProtocol(DatagramProtocol):
         def __init__(self) -> None:
-            self.hosts: Dict[str, Status] = {}
+            self.hosts: Dict[str, Info] = {}
 
         def connection_made(self, sock: BaseTransport) -> None:
             print(f"Connected: {sock}")
@@ -52,7 +52,7 @@ class Beacon:
                 elif data[1] == 0xCE and len(data) >= 6:
                     if isinstance(addr[0], str):
                         uptime = int.from_bytes(data[2:6], "big")
-                        self.hosts[addr[0]] = Status(uptime)
+                        self.hosts[addr[0]] = Info(uptime)
                     else:
                         print("Unsupported address")
                 else:
@@ -75,7 +75,7 @@ class Beacon:
     def close(self) -> None:
         self.sock.close()
 
-    async def discover(self) -> Dict[str, Status]:
+    async def discover(self) -> Dict[str, Info]:
         self.proto.hosts = {}
         self.sock.sendto(b"\x96\xEC", ("255.255.255.255", self.remote_port))
         await asyncio.sleep(1.0)
@@ -87,21 +87,21 @@ class Beacon:
         print(f"Sending reboot request to {addr}:{self.remote_port}")
         self.sock.sendto(b"\x96\xB0", (addr, self.remote_port))
 
-    async def find_hosts(self) -> List[Host]:
-        hosts: Dict[str, Host] = {}
+    async def find_hosts(self) -> List[Reflex]:
+        hosts: Dict[str, Reflex] = {}
         discovered = await self.discover()
         macs = get_macs([k for k in discovered.keys()])
         for mac, (addr, status) in zip(macs, discovered.items()):
             if mac is not None:
                 assert mac not in hosts
-                hosts[mac] = Host(mac, addr, status)
+                hosts[mac] = Reflex(mac, addr, status)
             else:
                 print(f"Cannot find MAC for {addr}")
         return list(hosts.values())
 
 
 def print_hosts() -> None:
-    async def find_hosts() -> List[Host]:
+    async def find_hosts() -> List[Reflex]:
         beacon = await Beacon.connect()
         hosts = await beacon.find_hosts()
         beacon.close()
@@ -109,7 +109,7 @@ def print_hosts() -> None:
 
     for host in asyncio.run(find_hosts()):
         print(f"MAC\tIP\tUptime")
-        print(f"{host.mac}\t{host.addr}\t{host.status.uptime} sec")
+        print(f"{host.mac}\t{host.addr}\t{host.info.uptime} sec")
 
 
 if __name__ == "__main__":

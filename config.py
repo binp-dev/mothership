@@ -1,6 +1,6 @@
 from pathlib import PurePosixPath as Path
 
-from mothership.config import Mac, Base, Host
+from mothership.hosts import Mac, Base, Host
 
 debian = Base("debian")
 tornado = Base("tornado", debian)

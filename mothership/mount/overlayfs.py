@@ -6,7 +6,9 @@ from dataclasses import dataclass
 from subprocess import run, PIPE
 import shutil
 
-from mothership.config import Config, Host, HOSTS_PATH
+from .paths import HOSTS_PATH
+from mothership.hosts import Host
+from mothership.config import Config
 
 
 @dataclass

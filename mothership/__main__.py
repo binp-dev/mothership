@@ -4,9 +4,8 @@ from typing import Self, Optional, Callable, Dict
 import asyncio
 from argparse import ArgumentParser
 
-from .mount.nfs import Nfs
-from .mount.overlayfs import Overlayfs
-from .config import Config, FS_PATH
+from .mount import FS_PATH, Nfs, Overlayfs
+from .config import Config
 from .beacon import print_hosts
 from .monitor.app import App as Monitor
 

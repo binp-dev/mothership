@@ -2,47 +2,23 @@ from __future__ import annotations
 from typing import Any, Optional, Dict, Callable, Awaitable
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta
 
 import asyncio
 
-from mothership.config import Config, Host as HostConfig, Mac
+from mothership.hosts import Mac, Host, OrphanStatus
 from mothership.beacon import Beacon
+from mothership.config import Config
 
 
 @dataclass
-class Status:
-    addr: str
-    boot: datetime
-    online: datetime
+class Entry:
+    config: Optional[Host]
+    status: Optional[OrphanStatus] = None
 
-    def flatten(self) -> Dict[str, Any]:
+    def dump(self) -> Dict[str, Any]:
         return {
-            "addr": self.addr,
-            "boot": int(self.boot.timestamp()),
-            "online": int(self.online.timestamp()),
-        }
-
-
-@dataclass
-class Host:
-    config: Optional[HostConfig]
-    status: Optional[Status] = None
-
-    def flatten(self) -> Dict[str, Any]:
-        return {
-            "config": {
-                "mac": str(self.config.mac),
-                **(
-                    {"base": self.config.base.name}
-                    if self.config.base is not None
-                    else {}
-                ),
-                **({"addr": self.config.addr} if self.config.addr is not None else {}),
-            }
-            if self.config is not None
-            else None,
-            "status": self.status.flatten() if self.status is not None else None,
+            "config": self.config.dump() if self.config is not None else None,
+            "status": self.status.dump() if self.status is not None else None,
         }
 
 
@@ -53,7 +29,7 @@ class Daemon:
         notify: Optional[Callable[[], Awaitable[None]]],
     ) -> None:
         self.beacon: Beacon
-        self.hosts = {hc.mac: Host(hc) for hc in config.hosts}
+        self.hosts = {hc.mac: Entry(hc) for hc in config.hosts}
         self.notify = notify
 
     async def run(self) -> None:
@@ -67,17 +43,19 @@ class Daemon:
             print(f"Scanning ...")
             discovered = await self.beacon.find_hosts()
             print(f"Found {len(discovered)} hosts")
-            for info in discovered:
-                key = Mac(info.mac)
+            for reflex in discovered:
+                key = Mac(reflex.mac)
                 if key not in self.hosts:
-                    self.hosts[key] = Host(None)
+                    self.hosts[key] = Entry(None)
                 host = self.hosts[key]
-                now = datetime.now()
-                host.status = Status(
-                    addr=info.addr,
-                    online=now,
-                    boot=(now - timedelta(seconds=info.status.uptime)),
-                )
+
+                if host.status is None:
+                    if host.config is not None:
+                        host.status = host.config.new_status(reflex)
+                    else:
+                        host.status = OrphanStatus(reflex)
+                await host.status.update(reflex)
+
             if self.notify is not None:
                 await self.notify()
             await asyncio.sleep(period)
@@ -92,5 +70,5 @@ class Daemon:
         print("Rebooting all hosts")
         self.beacon.reboot("255.255.255.255")
 
-    def flat_hosts(self) -> Dict[str, Any]:
-        return {str(mac): host.flatten() for mac, host in self.hosts.items()}
+    def dump_hosts(self) -> Dict[str, Any]:
+        return {str(mac): host.dump() for mac, host in self.hosts.items()}
