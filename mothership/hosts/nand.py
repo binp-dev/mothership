@@ -2,6 +2,9 @@ from __future__ import annotations
 from typing import Any, Optional, Dict
 
 from dataclasses import dataclass
+import hashlib
+
+import asyncssh
 
 from mothership.hosts import Host, Status
 from mothership.beacon import Reflex
@@ -20,8 +23,27 @@ class _NandStatus(Status):
         if old_boot < self.boot:
             self.nand_read = False
         if not self.nand_read:
-            self.bootloader = "U-boot"
-            self.fw_env_hash = "deadbeef"
+            async with asyncssh.connect(
+                self.addr,
+                username="root",
+                password="root",
+                known_hosts=None,
+            ) as conn:
+                result = await conn.run(
+                    "nanddump --length 100000 --quiet /dev/mtd1 | strings | grep U-Boot",
+                    check=True,
+                )
+                self.bootloader = result.stdout.split("\n")[0]
+
+                result = await conn.run("fw_printenv", check=True)
+                if len(result.stderr) == 0:
+                    self.fw_env_hash = hashlib.sha256(result.stdout).hexdigest()
+                else:
+                    if "Bad CRC" in result.stderr:
+                        self.fw_env_hash = "Bad CRC"
+                    else:
+                        self.fw_env_hash = "Unknown error"
+
             self.nand_read = True
 
     def dump(self) -> Dict[str, Any]:

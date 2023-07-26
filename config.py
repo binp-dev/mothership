@@ -14,6 +14,8 @@ class Skifio(Nand):
             mac,
             base=skifio,
             files={Path("/opt/env.cmd"): f"export DEV_NAME={name}\n"},
+            bootloader="U-Boot SPL 2020.04-49380-g63c8bf3c93-dirty (Jul 06 2023 - 18:16:39 +0700)",
+            fw_env_hash="1878585cac14306291b2465801c0f65dcfcbbf7278ef31a93c0b1e4789ace365",
         )
         self.name = name
 
