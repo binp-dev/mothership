@@ -3,6 +3,7 @@ import { CONTEXT } from "./context.js";
 import { navigate } from "./navigate.js"
 
 export const render = (hosts) => {
+    CONTEXT.hosts = hosts;
     const root = document.getElementById("hosts");
     for (const mac in hosts) {
         const host = hosts[mac]
@@ -14,11 +15,12 @@ export const render = (hosts) => {
             elem.onclick = () => { navigate(mac); };
             root.appendChild(elem);
         }
-        update_host_element(elem, mac, host);
+        update_host_tile(elem, mac, host);
     }
+    update_host_window(CONTEXT.location, hosts[CONTEXT.location]);
 }
 
-const update_host_element = (elem, mac, host) => {
+const update_host_tile = (elem, mac, host) => {
     let html = `<div class="mac">${mac.toUpperCase()}</div>`;
 
     elem.classList.remove("recent", "known", "warning", "error");
@@ -30,13 +32,10 @@ const update_host_element = (elem, mac, host) => {
         html += `<div>Not in config</div>`;
     }
 
-    let rebootable = false;
     if (host.status !== undefined && host.status !== null) {
         const boot = seconds_to_date(host.status.boot);
         html += `<div>${host.status.addr}</div>`
         html += `<div>Booted: ${format_date(boot)}</div>`;
-        html += `<button class="reboot">Reboot</button>`;
-        rebootable = true;
         const online = seconds_to_date(host.status.online);
         if (!is_now(online)) {
             html += `<div>Last seen: ${format_date(online)}</div>`;
@@ -56,6 +55,46 @@ const update_host_element = (elem, mac, host) => {
     }
 
     elem.innerHTML = html;
+}
+
+export const update_host_window = (mac, host) => {
+    const elem = document.getElementById("host-window");
+
+    let html = `<h1 class="mac">${mac.toUpperCase()}</h1>`;
+
+    let rebootable = false;
+    if (host !== undefined) {
+        if (host.config !== undefined && host.config !== null) {
+            html += `<div>Type: ${host.config.base}</div>`;
+        } else {
+            html += `<div>Not in config</div>`;
+        }
+
+        if (host.status !== undefined && host.status !== null) {
+            const boot = seconds_to_date(host.status.boot);
+            html += `<div>${host.status.addr}</div>`
+            html += `<div>Booted: ${format_date(boot)}</div>`;
+            html += `<button class="reboot">Reboot</button>`;
+            rebootable = true;
+            const online = seconds_to_date(host.status.online);
+            if (!is_now(online)) {
+                html += `<div>Last seen: ${format_date(online)}</div>`;
+                if (is_recent(online)) {
+                }
+            } else {
+                if (is_recent(boot)) {
+                }
+            }
+
+        } else {
+            html += `<div>Offline</div>`;
+        }
+    } else {
+        html += `Host '${mac}' not found.`
+    }
+
+    elem.innerHTML = html;
+
     if (rebootable) {
         elem.querySelector(".reboot").onclick = () => { reboot(mac) };
     }

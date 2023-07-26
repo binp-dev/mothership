@@ -1,4 +1,5 @@
 import { CONTEXT } from "./context.js";
+import { update_host_window } from "./hosts.js"
 
 export const navigate = (target) => {
     if (target === CONTEXT.location) {
@@ -7,9 +8,13 @@ export const navigate = (target) => {
     console.log(`Navigate to "${target}"`);
     CONTEXT.location = target;
     window.location.hash = "#" + target;
+
+    const wc = document.getElementById("window-container");
     if (target === "") {
-        CONTEXT.window_container.style.display = "none";
+        wc.style.display = "none";
     } else {
-        CONTEXT.window_container.style.display = "";
+        wc.style.display = "";
     }
+
+    update_host_window(target, CONTEXT.hosts[target]);
 }

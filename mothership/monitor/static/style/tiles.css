@@ -16,7 +16,7 @@
     background-color: #888877;
     box-shadow: 0 2px 16px rgba(0, 0, 0, 0.2);
 
-    backdrop-filter: brightness(50%);
+    cursor: pointer;
 }
 
 .tile.known {

@@ -20,6 +20,10 @@ b {
     font-weight: 600;
 }
 
+h1 {
+    margin: 0;
+}
+
 .mac {
     font-family: "Noto Sans Mono", monospace;
 }

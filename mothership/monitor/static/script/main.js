@@ -46,17 +46,13 @@ const subscribe = () => {
 const register = () => {
     document.getElementById("reboot-all").onclick = () => { reboot("all"); };
 
-    const wc = document.getElementById("window-container");
-    wc.style.display = "none";
-    wc.onclick = (ev) => {
+    document.getElementById("window-container").onclick = () => {
         navigate("");
     }
-    CONTEXT.window_container = wc;
-    const w = document.getElementById("host-window");
-    w.onclick = (ev) => {
+
+    document.getElementById("host-window").onclick = (ev) => {
         ev.stopPropagation();
     };
-
 
     window.onhashchange = (ev) => {
         navigate(ev.newURL.split("#", 2)[1]);
