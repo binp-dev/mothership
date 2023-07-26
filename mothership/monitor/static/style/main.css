@@ -36,7 +36,7 @@ h1 {
 }
 
 .badge {
-    padding: 2px;
+    padding: 0 2px 0 2px;
     color: #ffffff;
     background: linear-gradient(#888877, #777766);
     border-radius: 4px;
