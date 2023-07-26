@@ -14,7 +14,19 @@ export const render = () => {
             elem.id = mac;
             elem.classList.add("tile");
             elem.onclick = () => { navigate(mac); };
-            root.appendChild(elem);
+
+            const next = Array.from(root.childNodes).reduce((a, x) => {
+                if (elem.id < x.id && (a === null || x.id < a.id)) {
+                    return x;
+                } else {
+                    return a;
+                }
+            }, null);
+            if (next === null) {
+                root.appendChild(elem);
+            } else {
+                root.insertBefore(elem, next);
+            }
         }
         update_host_tile(elem, mac, host);
     }
