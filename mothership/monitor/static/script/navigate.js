@@ -16,5 +16,5 @@ export const navigate = (target) => {
         wc.style.display = "";
     }
 
-    update_host_window(target, CONTEXT.hosts[target]);
+    update_host_window();
 }

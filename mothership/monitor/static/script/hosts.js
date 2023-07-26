@@ -2,9 +2,9 @@ import { seconds_to_date, is_now, is_recent, format_date } from "./utils.js";
 import { CONTEXT } from "./context.js";
 import { navigate } from "./navigate.js"
 
-export const render = (hosts) => {
-    CONTEXT.hosts = hosts;
+export const render = () => {
     const root = document.getElementById("hosts");
+    const hosts = CONTEXT.hosts;
     for (const mac in hosts) {
         const host = hosts[mac]
         let elem = document.getElementById(mac);
@@ -17,7 +17,12 @@ export const render = (hosts) => {
         }
         update_host_tile(elem, mac, host);
     }
-    update_host_window(CONTEXT.location, hosts[CONTEXT.location]);
+    for (const elem of Array.from(root.childNodes)) {
+        if (hosts[elem.id] === undefined) {
+            root.removeChild(elem);
+        }
+    }
+    update_host_window();
 }
 
 const update_host_tile = (elem, mac, host) => {
@@ -57,8 +62,10 @@ const update_host_tile = (elem, mac, host) => {
     elem.innerHTML = html;
 }
 
-export const update_host_window = (mac, host) => {
+export const update_host_window = () => {
     const elem = document.getElementById("host-window");
+    const mac = CONTEXT.location;
+    const host = CONTEXT.hosts[mac];
 
     let html = `<h1 class="mac">${mac.toUpperCase()}</h1>`;
 

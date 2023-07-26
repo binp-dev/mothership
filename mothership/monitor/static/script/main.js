@@ -13,6 +13,7 @@ window.onload = main;
 const RETRY_TIMEOUT = 10 * 1000;
 
 const subscribe = () => {
+    render();
     const notify = document.getElementById("notify");
 
     const loc = window.location;
@@ -39,7 +40,8 @@ const subscribe = () => {
     };
     socket.onmessage = (e) => {
         console.log("Websocket received:", e.data);
-        render(JSON.parse(e.data));
+        CONTEXT.hosts = JSON.parse(e.data);
+        render();
     };
 }
 
