@@ -10,6 +10,7 @@ readme = "README.md"
 python = "^3.11"
 toml = "^0.10.2"
 aiohttp = "^3.8.4"
+asyncssh = "^2.13.2"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.4.0"
