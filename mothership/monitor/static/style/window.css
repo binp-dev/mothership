@@ -1,5 +1,5 @@
 #window-container {
-    /*display: none;*/
+    display: block;
     position: fixed;
     z-index: 10;
 
@@ -8,9 +8,22 @@
     width: 100vw;
     height: 100vh;
 
+    margin: 0;
+    padding: 0;
+
     overflow-y: scroll;
 
     background-color: rgba(0, 0, 0, 0.7);
+}
+
+#window-container:after {
+    position: fixed;
+    top: 4px;
+    right: 20px;
+    content: "X";
+    font-size: 50px;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
 }
 
 .window {

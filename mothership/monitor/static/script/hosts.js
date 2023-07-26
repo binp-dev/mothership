@@ -1,5 +1,6 @@
 import { seconds_to_date, is_now, is_recent, format_date } from "./utils.js";
 import { CONTEXT } from "./context.js";
+import { navigate } from "./navigate.js"
 
 export const render = (hosts) => {
     const root = document.getElementById("hosts");
@@ -9,7 +10,8 @@ export const render = (hosts) => {
         if (elem === null) {
             elem = document.createElement("div");
             elem.id = mac;
-            elem.classList.add("host");
+            elem.classList.add("tile");
+            elem.onclick = () => { navigate(mac); };
             root.appendChild(elem);
         }
         update_host_element(elem, mac, host);

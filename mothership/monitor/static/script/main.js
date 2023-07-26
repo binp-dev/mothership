@@ -1,10 +1,14 @@
 import { CONTEXT } from "./context.js";
 import { render, reboot } from "./hosts.js";
+import { navigate } from "./navigate.js"
 
 const main = () => {
-    document.getElementById("reboot-all").onclick = () => { reboot("all") };
+    register();
     subscribe();
+    navigate(window.location.hash.substring(1));
 }
+
+window.onload = main;
 
 const RETRY_TIMEOUT = 10 * 1000;
 
@@ -39,4 +43,22 @@ const subscribe = () => {
     };
 }
 
-window.onload = main;
+const register = () => {
+    document.getElementById("reboot-all").onclick = () => { reboot("all"); };
+
+    const wc = document.getElementById("window-container");
+    wc.style.display = "none";
+    wc.onclick = (ev) => {
+        navigate("");
+    }
+    CONTEXT.window_container = wc;
+    const w = document.getElementById("host-window");
+    w.onclick = (ev) => {
+        ev.stopPropagation();
+    };
+
+
+    window.onhashchange = (ev) => {
+        navigate(ev.newURL.split("#", 2)[1]);
+    };
+}
