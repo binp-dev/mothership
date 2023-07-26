@@ -11,7 +11,7 @@
     margin: 0;
     padding: 0;
 
-    overflow-y: scroll;
+    overflow-y: auto;
 
     background-color: rgba(0, 0, 0, 0.7);
 }
@@ -29,9 +29,9 @@
 .window {
     width: 75%;
     margin: 64px auto 64px auto;
-    padding: 4px;
+    padding: 8px;
 
-    overflow-x: scroll;
+    overflow-x: auto;
 
     background-color: #ffffff;
     box-shadow: 0 2px 16px rgba(0, 0, 0, 0.2);

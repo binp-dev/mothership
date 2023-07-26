@@ -3,6 +3,13 @@
 @import "window.css";
 @import "notify.css";
 
+body {
+    padding: 0;
+    margin: 0;
+    font-family: "Noto Sans", sans-serif;
+    background-color: #CCCCCC;
+}
+
 a {
     color: #000088;
     text-decoration: none;
@@ -28,9 +35,18 @@ h1 {
     font-family: "Noto Sans Mono", monospace;
 }
 
-body {
-    padding: 0;
-    margin: 0;
-    font-family: "Noto Sans", sans-serif;
-    background-color: #CCCCCC;
+.badge {
+    padding: 2px;
+    color: #ffffff;
+    background: linear-gradient(#888877, #777766);
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.badge.ok {
+    background: linear-gradient(#009926, #008822);
+}
+
+.badge.err {
+    background: linear-gradient(#bb2500, #aa2200);
 }
