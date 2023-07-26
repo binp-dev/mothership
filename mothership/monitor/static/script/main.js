@@ -1,14 +1,19 @@
 import { CONTEXT } from "./context.js";
 import { render, reboot } from "./hosts.js";
+import { navigate } from "./navigate.js"
 
 const main = () => {
-    document.getElementById("reboot-all").onclick = () => { reboot("all") };
+    register();
     subscribe();
+    navigate(window.location.hash.substring(1));
 }
+
+window.onload = main;
 
 const RETRY_TIMEOUT = 10 * 1000;
 
 const subscribe = () => {
+    render();
     const notify = document.getElementById("notify");
 
     const loc = window.location;
@@ -35,8 +40,23 @@ const subscribe = () => {
     };
     socket.onmessage = (e) => {
         console.log("Websocket received:", e.data);
-        render(JSON.parse(e.data));
+        CONTEXT.hosts = JSON.parse(e.data);
+        render();
     };
 }
 
-window.onload = main;
+const register = () => {
+    document.getElementById("reboot-all").onclick = () => { reboot("all"); };
+
+    document.getElementById("window-container").onclick = () => {
+        navigate("");
+    }
+
+    document.getElementById("host-window").onclick = (ev) => {
+        ev.stopPropagation();
+    };
+
+    window.onhashchange = (ev) => {
+        navigate(ev.newURL.split("#", 2)[1]);
+    };
+}

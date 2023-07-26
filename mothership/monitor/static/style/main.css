@@ -1,8 +1,12 @@
 @import "top.css";
-@import "hosts.css";
-@import "spinner.css";
+@import "tiles.css";
+@import "window.css";
+@import "notify.css";
 
 body {
+    padding: 0;
+    margin: 0;
+    font-family: "Noto Sans", sans-serif;
     background-color: #CCCCCC;
 }
 
@@ -23,33 +27,26 @@ b {
     font-weight: 600;
 }
 
-body {
-    padding: 0;
+h1 {
     margin: 0;
-    font-family: "Noto Sans", sans-serif;
-}
-
-#notify {
-    position: fixed;
-    display: inline-block;
-
-    top: 0;
-    padding: 4px;
-
-    /* To center position:fixed element */
-    left: 50%;
-    transform: translateX(-50%);
-
-    font-size: 24px;
-    background-color: #ffffff;
-    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
-    z-index: 100;
-}
-
-#notify.hidden {
-    display: none;
 }
 
 .mac {
     font-family: "Noto Sans Mono", monospace;
+}
+
+.badge {
+    padding: 2px;
+    color: #ffffff;
+    background: linear-gradient(#888877, #777766);
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.badge.ok {
+    background: linear-gradient(#009926, #008822);
+}
+
+.badge.err {
+    background: linear-gradient(#bb2500, #aa2200);
 }

@@ -1,4 +1,4 @@
-#hosts {
+.tiles-container {
     margin: 0;
     padding: 4px;
     padding-top: 40px;
@@ -6,39 +6,39 @@
     flex-wrap: wrap;
 }
 
-.host {
+.tile {
     display: inline-block;
     margin: 8px;
     padding: 8px;
     overflow: hidden;
 
     color: #ffffff;
-    background-color: #888877;
+    background-color: #777766;
     box-shadow: 0 2px 16px rgba(0, 0, 0, 0.2);
 
-    backdrop-filter: brightness(50%);
+    cursor: pointer;
 }
 
-.host.known {
+.tile.known {
     background-color: #008822;
 }
 
-.host.known.recent {
+.tile.known.recent {
     background-color: #009926;
 }
 
-.host.known.warning {
+.tile.known.warning {
     background-color: #aa8800;
 }
 
-.host.known.warning.recent {
+.tile.known.warning.recent {
     background-color: #bb9500;
 }
 
-.host.known.error {
+.tile.known.error {
     background-color: #aa2200;
 }
 
-.host.known.error.recent {
+.tile.known.error.recent {
     background-color: #bb2500;
 }

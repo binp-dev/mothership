@@ -1,0 +1,38 @@
+#window-container {
+    display: block;
+    position: fixed;
+    z-index: 10;
+
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+
+    margin: 0;
+    padding: 0;
+
+    overflow-y: auto;
+
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+#window-container:after {
+    position: fixed;
+    top: 4px;
+    right: 20px;
+    content: "X";
+    font-size: 40px;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+}
+
+.window {
+    width: 75%;
+    margin: 64px auto 64px auto;
+    padding: 8px;
+
+    overflow-x: auto;
+
+    background-color: #ffffff;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.2);
+}
