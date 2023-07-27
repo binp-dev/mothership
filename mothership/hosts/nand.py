@@ -6,11 +6,11 @@ import hashlib
 
 import asyncssh
 
-from mothership.hosts import Host, Status
+from mothership.hosts import Host, HostStatus
 from mothership.beacon import Reflex
 
 
-class _NandStatus(Status):
+class _NandStatus(HostStatus):
     def __init__(self, *args: Any) -> None:
         super().__init__(*args)
         self.nand_read = False

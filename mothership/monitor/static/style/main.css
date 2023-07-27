@@ -38,15 +38,32 @@ h1 {
 .badge {
     padding: 0 2px 0 2px;
     color: #ffffff;
-    background: linear-gradient(#888877, #777766);
+    background: linear-gradient(#888877, #666656);
     border-radius: 4px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 .badge.ok {
-    background: linear-gradient(#009926, #008822);
+    background: linear-gradient(#009926, #00771e);
+}
+
+.badge.warn {
+    background: linear-gradient(#bb9500, #997b00);
 }
 
 .badge.err {
-    background: linear-gradient(#bb2500, #aa2200);
+    background: linear-gradient(#bb2500, #991f00);
+}
+
+.code {
+    padding: 4px;
+    white-space: pre-wrap;
+    font-family: "Noto Sans Mono", monospace;
+    border: 1px solid #00007760;
+    background-color: #00009940;
+}
+
+.code.err {
+    border: 1px solid #991f0060;
+    background-color: #bb250040;
 }

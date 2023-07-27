@@ -2,18 +2,19 @@ from __future__ import annotations
 from typing import Any, Optional, Dict, Callable, Awaitable
 
 from dataclasses import dataclass
+import traceback
 
 import asyncio
 
-from mothership.hosts import Mac, Host, OrphanStatus
-from mothership.beacon import Beacon
+from mothership.hosts import Mac, Host, Status, OrphanStatus
+from mothership.beacon import Beacon, Reflex
 from mothership.config import Config
 
 
 @dataclass
 class Entry:
     config: Optional[Host]
-    status: Optional[OrphanStatus] = None
+    status: Optional[Status] = None
 
     def dump(self) -> Dict[str, Any]:
         return {
@@ -43,22 +44,35 @@ class Daemon:
             print(f"Scanning ...")
             discovered = await self.beacon.find_hosts()
             print(f"Found {len(discovered)} hosts")
-            for reflex in discovered:
-                key = Mac(reflex.mac)
-                if key not in self.hosts:
-                    self.hosts[key] = Entry(None)
-                host = self.hosts[key]
 
-                if host.status is None:
-                    if host.config is not None:
-                        host.status = host.config.new_status(reflex)
-                    else:
-                        host.status = OrphanStatus(reflex)
-                await host.status.update(reflex)
+            await asyncio.gather(*[self._update_host(reflex) for reflex in discovered])
 
             if self.notify is not None:
                 await self.notify()
             await asyncio.sleep(period)
+
+    async def _update_host(self, reflex: Reflex) -> None:
+        key = Mac(reflex.mac)
+        if key not in self.hosts:
+            self.hosts[key] = Entry(None)
+        host = self.hosts[key]
+
+        if host.status is None:
+            if host.config is not None:
+                host.status = host.config.new_status(reflex)
+            else:
+                host.status = OrphanStatus(reflex)
+
+        try:
+            async with asyncio.timeout(4):
+                await host.status.update(reflex)
+        except Exception:
+            host.status.error = traceback.format_exc()
+            print(
+                f"Error while updating host '{reflex.mac} ({reflex.addr})' status:\n{host.status.error}"
+            )
+        else:
+            host.status.error = None
 
     def reboot(self, mac: Mac) -> None:
         print(f"Rebooting host {mac}")

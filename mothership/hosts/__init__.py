@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, List, Dict, Protocol, Type, ClassVar, final
+from typing import Any, Optional, List, Dict, Protocol, Type, ClassVar, final
 
 from pathlib import Path, PurePosixPath
 from dataclasses import dataclass, field
@@ -59,7 +59,7 @@ class Base:
         return [*base, self.path]
 
 
-class OrphanStatus:
+class Status:
     @final
     def _update_reflex(self, reflex: Reflex) -> None:
         now = datetime.now()
@@ -68,6 +68,7 @@ class OrphanStatus:
         self.boot = now - timedelta(seconds=reflex.info.uptime)
 
     def __init__(self, reflex: Reflex) -> None:
+        self.error: Optional[str] = None
         self._update_reflex(reflex)
 
     async def update(self, reflex: Reflex) -> None:
@@ -78,10 +79,16 @@ class OrphanStatus:
             "addr": self.addr,
             "boot": int(self.boot.timestamp()),
             "online": int(self.online.timestamp()),
+            **({"error": self.error} if self.error is not None else {}),
         }
 
 
-class Status(OrphanStatus):
+@final
+class OrphanStatus(Status):
+    pass
+
+
+class HostStatus(Status):
     def __init__(self, reflex: Reflex, host: Host, /) -> None:
         super().__init__(reflex)
         self.host = host
@@ -89,7 +96,7 @@ class Status(OrphanStatus):
 
 @dataclass
 class Host:
-    Status: ClassVar[Type[Status]] = Status
+    Status: ClassVar[Type[Status]] = HostStatus
 
     mac: Mac
     addr: str | None = None
@@ -101,7 +108,7 @@ class Host:
         return HOSTS_PATH / str(self.mac) / "merged"
 
     @final
-    def new_status(self, reflex: Reflex) -> Status:
+    def new_status(self, reflex: Reflex) -> HostStatus:
         ty: Type[Status]
         if hasattr(type(self), "Status"):
             ty = self.Status

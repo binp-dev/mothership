@@ -13,14 +13,14 @@
     overflow: hidden;
 
     color: #ffffff;
-    background-color: #777766;
+    background-color: #666656;
     box-shadow: 0 2px 16px rgba(0, 0, 0, 0.2);
 
     cursor: pointer;
 }
 
 .tile.known {
-    background-color: #008822;
+    background-color: #00771e;
 }
 
 .tile.known.recent {
@@ -28,7 +28,7 @@
 }
 
 .tile.known.warning {
-    background-color: #aa8800;
+    background-color: #997b00;
 }
 
 .tile.known.warning.recent {
@@ -36,7 +36,7 @@
 }
 
 .tile.known.error {
-    background-color: #aa2200;
+    background-color: #991f00;
 }
 
 .tile.known.error.recent {

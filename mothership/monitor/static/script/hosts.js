@@ -69,6 +69,9 @@ const update_host_tile = (elem, mac, host) => {
                 elem.classList.add("recent");
             }
         }
+        if (host.status.error !== undefined) {
+            elem.classList.add("warning");
+        }
     } else {
         html += `<div>Offline</div>`;
         elem.classList.add("error");
@@ -116,6 +119,9 @@ export const update_host_window = () => {
                 html += `<div>Last seen: <span class="badge err">${format_date_relative(online)}</span> (${format_date(online)})</div>`;
             }
 
+            if (host.status.error !== undefined) {
+                html += `<div>Error:</div><div class="code err">${host.status.error}</div>`;
+            }
         } else {
             html += `<div>Status: <span class="badge err">Offline</span></div>`;
         }
