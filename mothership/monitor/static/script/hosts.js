@@ -14,19 +14,7 @@ export const render = () => {
             elem.id = mac;
             elem.classList.add("tile");
             elem.onclick = () => { navigate(mac); };
-
-            const next = Array.from(root.childNodes).reduce((a, x) => {
-                if (elem.id < x.id && (a === null || x.id < a.id)) {
-                    return x;
-                } else {
-                    return a;
-                }
-            }, null);
-            if (next === null) {
-                root.appendChild(elem);
-            } else {
-                root.insertBefore(elem, next);
-            }
+            root.appendChild(elem);
         }
         update_host_tile(elem, mac, host);
     }
@@ -35,6 +23,10 @@ export const render = () => {
         if (hosts[elem.id] === undefined) {
             root.removeChild(elem);
         }
+    }
+
+    for (const [i, elem] of Array.from(root.childNodes).sort((a, b) => (a.id > b.id) - (a.id < b.id)).entries()) {
+        elem.style.order = i;
     }
 
     update_host_window();
