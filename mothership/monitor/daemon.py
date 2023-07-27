@@ -10,11 +10,14 @@ from mothership.hosts import Mac, Host, Status, OrphanStatus
 from mothership.beacon import Beacon, Reflex
 from mothership.config import Config
 
+UPDATE_TIMEOUT = 10
+
 
 @dataclass
 class Entry:
     config: Optional[Host]
     status: Optional[Status] = None
+    force_update: bool = True
 
     def dump(self) -> Dict[str, Any]:
         return {
@@ -64,8 +67,8 @@ class Daemon:
                 host.status = OrphanStatus(reflex)
 
         try:
-            async with asyncio.timeout(4):
-                await host.status.update(reflex)
+            async with asyncio.timeout(UPDATE_TIMEOUT):
+                await host.status.update(reflex, force=host.force_update)
         except Exception:
             host.status.error = traceback.format_exc()
             print(
@@ -73,6 +76,7 @@ class Daemon:
             )
         else:
             host.status.error = None
+            host.force_update = False
 
     def reboot(self, mac: Mac) -> None:
         print(f"Rebooting host {mac}")
@@ -83,6 +87,13 @@ class Daemon:
     def reboot_all(self) -> None:
         print("Rebooting all hosts")
         self.beacon.reboot("255.255.255.255")
+
+    def update(self, mac: Mac) -> None:
+        self.hosts[mac].force_update = True
+
+    def update_all(self) -> None:
+        for host in self.hosts.values():
+            host.force_update = True
 
     def dump_hosts(self) -> Dict[str, Any]:
         return {str(mac): host.dump() for mac, host in self.hosts.items()}

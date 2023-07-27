@@ -1,5 +1,5 @@
 import { CONTEXT } from "./context.js";
-import { render, reboot } from "./hosts.js";
+import { render, update, reboot } from "./hosts.js";
 import { navigate } from "./navigate.js"
 
 const main = () => {
@@ -46,6 +46,7 @@ const subscribe = () => {
 }
 
 const register = () => {
+    document.getElementById("update-all").onclick = () => { update("all"); };
     document.getElementById("reboot-all").onclick = () => { reboot("all"); };
 
     document.getElementById("window-container").onclick = () => {

@@ -33,7 +33,7 @@ export const render = () => {
 }
 
 const update_host_tile = (elem, mac, host) => {
-    let html = `<div class="mac">${mac.toUpperCase()}</div>`;
+    let html = `<div class="mono">${mac.toUpperCase()}</div>`;
 
     elem.classList.remove("recent", "known", "warning", "error");
 
@@ -46,18 +46,18 @@ const update_host_tile = (elem, mac, host) => {
     }
 
     if (host.status !== null) {
-        const boot = seconds_to_date(host.status.boot);
         html += `<div>${host.status.addr}</div>`
-        html += `<div>Booted: ${compact_date_html(boot)}</div>`;
-        const online = seconds_to_date(host.status.online);
-        if (!is_now(online)) {
-            html += `<div>Last seen: ${compact_date_html(online)}</div>`;
+        const booted = seconds_to_date(host.status.boot);
+        html += `<div>Booted: ${compact_date_html(booted)}</div>`;
+        const last_seen = seconds_to_date(host.status.online);
+        if (!is_now(last_seen)) {
+            html += `<div>Last seen: ${compact_date_html(last_seen)}</div>`;
             elem.classList.add("error");
-            if (is_recent(online)) {
+            if (is_recent(last_seen)) {
                 elem.classList.add("recent");
             }
         } else {
-            if (is_recent(boot)) {
+            if (is_recent(booted)) {
                 elem.classList.add("recent");
             }
         }
@@ -88,9 +88,9 @@ export const update_host_window = () => {
     const mac = CONTEXT.location;
     const host = CONTEXT.hosts[mac];
 
-    let html = `<h1 class="mac">${mac.toUpperCase()}</h1>`;
+    let html = `<h1 class="mono">${mac.toUpperCase()}</h1>`;
 
-    let rebootable = false;
+    let online = false;
     if (host !== undefined) {
         if (host.config !== null) {
             html += `<div>Class: ${host_class(host)}</div>`;
@@ -100,15 +100,23 @@ export const update_host_window = () => {
         }
 
         if (host.status !== null) {
-            const boot = seconds_to_date(host.status.boot);
+            const last_seen = seconds_to_date(host.status.online);
+            online = is_now(last_seen);
+
             html += `<div>Address: ${host.status.addr}</div>`
-            html += `<div>Booted: ${format_date_relative(boot)} (${format_date(boot)}) <button class="reboot">Reboot</button></div>`;
-            rebootable = true;
-            const online = seconds_to_date(host.status.online);
-            if (is_now(online)) {
-                html += `<div>Last seen: <span class="badge ok">Now</span></div>`;
+
+            const booted = seconds_to_date(host.status.boot);
+            let boot_html = `Booted: ${format_date_relative(booted)} (${format_date(booted)})`;
+            if (online) {
+                boot_html += `<button class="reboot danger">Reboot</button>`;
+            }
+            html += `<div>${boot_html}</div>`;
+
+            if (online) {
+                html += `<div>Status: <span class="badge ok">Online</span><button class="update">Update</button></div>`;
             } else {
-                html += `<div>Last seen: <span class="badge err">${format_date_relative(online)}</span> (${format_date(online)})</div>`;
+                html += `<div>Status: <span class="badge err">Offline</span></div>`;
+                html += `<div>Last seen: ${format_date_relative(last_seen)} (${format_date(last_seen)})</div>`;
             }
 
             if (host.status.error !== undefined) {
@@ -129,9 +137,14 @@ export const update_host_window = () => {
 
     elem.innerHTML = html;
 
-    if (rebootable) {
+    if (online) {
+        elem.querySelector(".update").onclick = () => { update(mac) };
         elem.querySelector(".reboot").onclick = () => { reboot(mac) };
     }
+}
+
+export const update = (mac) => {
+    CONTEXT.socket.send(`{"type": "update", "target": "${mac}"}`)
 }
 
 export const reboot = (mac) => {

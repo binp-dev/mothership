@@ -17,12 +17,16 @@ class _NandStatus(HostStatus):
         self.bootloader: Optional[str] = None
         self.fw_env_hash: Optional[str] = None
 
-    async def update(self, reflex: Reflex) -> None:
+    async def update(self, reflex: Reflex, force: bool = True) -> None:
         old_boot = self.boot
-        await super().update(reflex)
-        if old_boot < self.boot:
+
+        await super().update(reflex, force=force)
+
+        if force or (self.boot - old_boot).total_seconds() > 10.0:
             self.nand_read = False
+
         if not self.nand_read:
+            print(f"Reading NAND of '{self.host.mac}'")
             async with asyncssh.connect(
                 self.addr,
                 username="root",

@@ -50,6 +50,11 @@ class App(web.Application):
                             self.daemon.reboot_all()
                         else:
                             self.daemon.reboot(Mac(req["target"]))
+                    elif req["type"] == "update":
+                        if req["target"] == "all":
+                            self.daemon.update_all()
+                        else:
+                            self.daemon.update(Mac(req["target"]))
                     else:
                         print(f"Unknown request type")
                 elif msg.type == web.WSMsgType.CLOSE:

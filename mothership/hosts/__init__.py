@@ -71,7 +71,7 @@ class Status:
         self.error: Optional[str] = None
         self._update_reflex(reflex)
 
-    async def update(self, reflex: Reflex) -> None:
+    async def update(self, reflex: Reflex, force: bool = False) -> None:
         self._update_reflex(reflex)
 
     def dump(self) -> Dict[str, Any]:
