@@ -28,6 +28,7 @@ class _NandStatus(HostStatus):
                 username="root",
                 password="root",
                 known_hosts=None,
+                encoding="utf-8",
             ) as conn:
                 result = await conn.run(
                     "nanddump --length 100000 --quiet /dev/mtd1 | strings | grep U-Boot",
@@ -37,7 +38,9 @@ class _NandStatus(HostStatus):
 
                 result = await conn.run("fw_printenv", check=True)
                 if len(result.stderr) == 0:
-                    self.fw_env_hash = hashlib.sha256(result.stdout).hexdigest()
+                    self.fw_env_hash = hashlib.sha256(
+                        result.stdout.encode()
+                    ).hexdigest()
                 else:
                     if "Bad CRC" in result.stderr:
                         self.fw_env_hash = "Bad CRC"
