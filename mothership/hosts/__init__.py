@@ -1,5 +1,16 @@
 from __future__ import annotations
-from typing import Any, Optional, List, Dict, Protocol, Type, ClassVar, final
+from typing import (
+    Any,
+    Optional,
+    List,
+    Dict,
+    Protocol,
+    Type,
+    ClassVar,
+    final,
+    Generic,
+    TypeVar,
+)
 
 from pathlib import Path, PurePosixPath
 from dataclasses import dataclass, field
@@ -88,16 +99,8 @@ class OrphanStatus(Status):
     pass
 
 
-class HostStatus(Status):
-    def __init__(self, reflex: Reflex, host: Host, /) -> None:
-        super().__init__(reflex)
-        self.host = host
-
-
 @dataclass
 class Host:
-    Status: ClassVar[Type[Status]] = HostStatus
-
     mac: Mac
     addr: str | None = None
     base: Base | None = None
@@ -107,19 +110,13 @@ class Host:
     def path(self) -> Path:
         return HOSTS_PATH / str(self.mac) / "merged"
 
+    @classmethod
+    def status_classes(cls) -> List[Type[Status]]:
+        return [HostStatus]
+
     @final
     def new_status(self, reflex: Reflex) -> HostStatus:
-        ty: Type[Status]
-        if hasattr(type(self), "Status"):
-            ty = self.Status
-        else:
-            ty = type(
-                [
-                    cls.Status
-                    for cls in self.__mro__
-                    if issubclass(cls, Host) and hasattr(cls, "Status")
-                ]
-            )
+        ty = type(f"_{type(self).__name__}Status", tuple(self.status_classes()), {})
         return ty(reflex, self)
 
     def dump(self) -> Dict[str, Any]:
@@ -128,3 +125,12 @@ class Host:
             **({"base": self.base.name} if self.base is not None else {}),
             **({"addr": self.addr} if self.addr is not None else {}),
         }
+
+
+T = TypeVar("T", bound=Host, covariant=True)
+
+
+class HostStatus(Status, Generic[T]):
+    def __init__(self, reflex: Reflex, host: T, /) -> None:
+        super().__init__(reflex)
+        self.host = host

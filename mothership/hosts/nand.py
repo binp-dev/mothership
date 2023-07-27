@@ -1,16 +1,49 @@
 from __future__ import annotations
-from typing import Any, Optional, Dict
+from typing import Any, Optional, List, Dict, Type
 
-from dataclasses import dataclass
 import hashlib
 
 import asyncssh
 
-from mothership.hosts import Host, HostStatus
+from mothership.hosts import Host, Status, HostStatus
 from mothership.beacon import Reflex
 
 
-class _NandStatus(HostStatus):
+class Nand(Host):
+    def __init__(
+        self,
+        *args: Any,
+        bootloader: Optional[str] = None,
+        fw_env_hash: Optional[str] = None,
+        **kws: Any,
+    ) -> None:
+        super().__init__(*args, **kws)
+        self.bootloader = bootloader
+        self.fw_env_hash = fw_env_hash
+
+    @classmethod
+    def status_classes(cls) -> List[Type[Status]]:
+        return [_NandStatus, *super().status_classes()]
+
+    def dump(self) -> Dict[str, Any]:
+        return {
+            **super().dump(),
+            "nand": {
+                **(
+                    {"bootloader": self.bootloader}
+                    if self.bootloader is not None
+                    else {}
+                ),
+                **(
+                    {"fw_env_hash": self.fw_env_hash}
+                    if self.fw_env_hash is not None
+                    else {}
+                ),
+            },
+        }
+
+
+class _NandStatus(HostStatus[Nand]):
     def __init__(self, *args: Any) -> None:
         super().__init__(*args)
         self.nand_read = False
@@ -69,28 +102,3 @@ class _NandStatus(HostStatus):
                 ),
             }
         return data
-
-
-@dataclass
-class Nand(Host):
-    Status = _NandStatus
-
-    bootloader: Optional[str] = None
-    fw_env_hash: Optional[str] = None
-
-    def dump(self) -> Dict[str, Any]:
-        return {
-            **super().dump(),
-            "nand": {
-                **(
-                    {"bootloader": self.bootloader}
-                    if self.bootloader is not None
-                    else {}
-                ),
-                **(
-                    {"fw_env_hash": self.fw_env_hash}
-                    if self.fw_env_hash is not None
-                    else {}
-                ),
-            },
-        }

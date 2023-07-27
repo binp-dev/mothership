@@ -78,6 +78,9 @@ const update_host_tile = (elem, mac, host) => {
                 elem.classList.add("warning");
             }
         }
+        if (host.config.ioc !== undefined && host.status.ioc === undefined) {
+            elem.classList.add("warning");
+        }
     }
 
     elem.innerHTML = html;
@@ -130,6 +133,9 @@ export const update_host_window = () => {
             if (host.config.nand !== undefined) {
                 html += nand_block(host);
             }
+            if (host.config.ioc !== undefined) {
+                html += ioc_block(host);
+            }
         }
     } else {
         html += `<h2><span class="badge err">Host '${mac}' not found</span></h2>`
@@ -153,13 +159,16 @@ export const reboot = (mac) => {
 
 const host_class = (host) => {
     let types = [];
+    if (host.config.ioc !== undefined) {
+        types.push("ioc");
+    }
     if (host.config.nand !== undefined) {
         types.push("nand");
     }
     if (types.length == 0) {
         return "default"
     } else {
-        return types.join("-");
+        return types.join("+");
     }
 }
 
@@ -183,6 +192,19 @@ const nand_block = (host) => {
         html += `<div>FW env hash: <span class="badge ${envc}">${host.status.nand.fw_env_hash}</span></div>`;
     } else {
         html += `<span class="badge err">Cannot read</span>`;
+    }
+    return html;
+}
+
+const ioc_block = (host) => {
+    let html = `<div><b>IOC:</b></div>`;
+    if (host.status.ioc !== undefined) {
+        html += `<div>Version: <span class="badge ok">${host.status.ioc.version}</span></div>`;
+        if (host.status.ioc.build_date) {
+            html += `<div>Build date: <span class="badge ok">${host.status.ioc.build_date}</span></div>`;
+        }
+    } else {
+        html += `<span class="badge err">Cannot connect</span>`;
     }
     return html;
 }
