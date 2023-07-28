@@ -23,6 +23,7 @@ class App(web.Application):
         self.add_routes(
             [
                 web.get("/websocket", self._websocket_handler),
+                web.get("/hosts", self._hosts_handler),
                 web.get("/", self._index_handler),
                 web.static("/", self.files_path, append_version=True),
             ]
@@ -30,6 +31,9 @@ class App(web.Application):
 
     async def _index_handler(self, request: web.Request) -> web.FileResponse:
         return web.FileResponse(self.files_path / "index.html")
+
+    async def _hosts_handler(self, request: web.Request) -> web.Response:
+        return web.json_response(self.daemon.dump_hosts())
 
     async def _websocket_handler(self, request: web.Request) -> web.WebSocketResponse:
         print("Websocket connected")

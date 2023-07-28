@@ -39,18 +39,18 @@ class _IocStatus(HostStatus[Ioc]):
                 self.version = await (
                     await Pv.connect(f"{self.host.prefix}Version")
                 ).get()
-                self.build_date = await (
-                    await Pv.connect(f"{self.host.prefix}BuildDate")
-                ).get()
+                # self.build_date = await (
+                #    await Pv.connect(f"{self.host.prefix}BuildDate")
+                # ).get()
         except TimeoutError:
             self.version = None
-            self.build_date = None
+            # self.build_date = None
 
     def dump(self) -> Dict[str, Any]:
         data = super().dump()
         if self.version is not None:
             data["ioc"] = {
                 "version": self.version,
-                "build_date": self.build_date,
+                # "build_date": self.build_date,
             }
         return data

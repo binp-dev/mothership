@@ -199,10 +199,8 @@ const nand_block = (host) => {
 const ioc_block = (host) => {
     let html = `<div><b>IOC:</b></div>`;
     if (host.status.ioc !== undefined) {
-        html += `<div>Version: <span class="badge ok">${host.status.ioc.version}</span></div>`;
-        if (host.status.ioc.build_date) {
-            html += `<div>Build date: <span class="badge ok">${host.status.ioc.build_date}</span></div>`;
-        }
+        html += `<div>Status: <span class="badge ok">Running</span></div>`;
+        html += `<div>Version: ${host.status.ioc.version}${host.status.ioc.build_date ? " (" + host.status.ioc.build_date + ")" : ""}</div>`;
     } else {
         html += `<span class="badge err">Cannot connect</span>`;
     }
